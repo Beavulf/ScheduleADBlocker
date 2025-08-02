@@ -1,0 +1,422 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type AuthModel {
+  accessToken: String!
+}
+
+input CreateInput {
+  """Имя домена сервера отдела/ПТО"""
+  domainName: String!
+
+  """Адрес IP сервера отдела/ПТО"""
+  ipAddress: String!
+
+  """Наименование отдела/ПТО"""
+  name: String!
+}
+
+type CreateModel {
+  """Имя создателя записи"""
+  createdBy: String!
+
+  """Имя домена сервера отдела/ПТО"""
+  domainName: String!
+
+  """ID отдела/ПТО"""
+  id: String!
+
+  """Адрес IP сервера отдела/ПТО"""
+  ipAddress: String!
+
+  """Наименование отдела/ПТО"""
+  name: String!
+
+  """Имя изменившего запись"""
+  updatedBy: String!
+}
+
+input DateFilterInput {
+  eq: DateTime
+  gt: DateTime
+  gte: DateTime
+  lt: DateTime
+  lte: DateTime
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+input FieldSortInput {
+  field: String!
+  order: String
+}
+
+input LoginInput {
+  password: String!
+  username: String!
+}
+
+input ModifyInput {
+  """Путь до пользователя в АД"""
+  userDn: String!
+}
+
+type Mutation {
+  auth(data: LoginInput!): AuthModel!
+
+  """Создание разовой задачи"""
+  craeteOneTime(data: OneTimeCreateInput!): Boolean!
+  createOtdel(data: CreateInput!): Boolean!
+
+  """Создание отзыва"""
+  createRecall(data: RecallCreateInput!, idSchedule: String!): Boolean!
+
+  """Добавление записи в расписание"""
+  createSchedule(data: ScheduleCreateInput!): Boolean!
+
+  """Удаление разовой задачи"""
+  deleteOneTime(id: ID!): Boolean!
+  deleteOtdel(id: ID!): Boolean!
+
+  """Удаление отзыва"""
+  deleteRecall(id: ID!): Boolean!
+
+  """Удаление записи расписания"""
+  deleteSchedule(id: ID!): Boolean!
+
+  """Отключение пользователя в AD"""
+  disableUser(data: ModifyInput!): Boolean!
+
+  """Включение пользователя в AD"""
+  enableUser(data: ModifyInput!): Boolean!
+  logout: Boolean!
+  refreshToken: AuthModel!
+
+  """Изменение разовой задачи"""
+  updateOneTime(data: OneTimeUpdateInput!, id: ID!): Boolean!
+  updateOtdel(data: UpdateInput!, id: ID!): Boolean!
+
+  """Изменение отзыва"""
+  updateRecall(data: RecallUpdateInput!, id: ID!): Boolean!
+
+  """Изменение записи расписания"""
+  updateSchedule(data: ScheduleUpdateInput!, id: ID!): Boolean!
+}
+
+input OneTimeCreateInput {
+  """Дата выполнения задачи"""
+  date: DateTime!
+
+  """Описание задачи"""
+  description: String
+
+  """ФИО пользователя"""
+  fio: String!
+
+  """Выполненна ли задача"""
+  isCompleate: Boolean
+
+  """Логин пользователя"""
+  login: String!
+
+  """Что сделать с пользователем - включить или отключить (true/false)"""
+  state: Boolean!
+}
+
+input OneTimeFilterInput {
+  """Дата создания записи"""
+  createdAt: DateFilterInput
+
+  """Имя пользователя, создавшего запись"""
+  createdBy: StringFilterInput
+
+  """Дата выполнения задачи"""
+  date: DateFilterInput
+
+  """Описание задачи"""
+  description: StringFilterInput
+
+  """ФИО пользователя"""
+  fio: StringFilterInput
+
+  """Айди записи"""
+  id: String
+
+  """Выполненна ли задача"""
+  isCompleate: Boolean
+
+  """Логин пользователя"""
+  login: StringFilterInput
+
+  """Что сделать с пользователем - включить или отключить (true/false)"""
+  state: Boolean
+
+  """Дата обновления записи"""
+  updatedAt: DateFilterInput
+
+  """Имя пользователя, обновляющего запись"""
+  updatedBy: StringFilterInput
+}
+
+type OneTimeGetModel {
+  """Дата создания записи"""
+  createdAt: DateTime!
+
+  """Имя пользователя, создавшего запись"""
+  createdBy: String!
+
+  """Дата выполнения задачи"""
+  date: DateTime!
+
+  """Описание задачи"""
+  description: String
+
+  """ФИО пользователя"""
+  fio: String!
+
+  """Айди записи"""
+  id: String!
+
+  """Выполненна ли задача"""
+  isCompleate: Boolean!
+
+  """Логин пользователя"""
+  login: String!
+
+  """Что сделать с пользователем - включить или отключить (true/false)"""
+  state: Boolean!
+
+  """Дата обновления записи"""
+  updatedAt: DateTime!
+
+  """Имя пользователя, обновляющего запись"""
+  updatedBy: String!
+}
+
+input OneTimeUpdateInput {
+  """Дата выполнения задачи"""
+  date: DateTime
+
+  """Описание задачи"""
+  description: String
+
+  """ФИО пользователя"""
+  fio: String
+
+  """Выполненна ли задача"""
+  isCompleate: Boolean
+
+  """Логин пользователя"""
+  login: String
+
+  """Что сделать с пользователем - включить или отключить (true/false)"""
+  state: Boolean
+}
+
+type Query {
+  """
+  Получение списка отзывов (фильтр, сортировка, пропустить, сколько взять)
+  """
+  getOneTimes(filter: OneTimeFilterInput, skip: Float, sort: FieldSortInput, take: Float): [OneTimeGetModel!]!
+
+  """Получение списка отделов/ПТО"""
+  getOtdels: [CreateModel!]!
+
+  """
+  Получение списка отзывов (фильтр, сортировка, пропустить, сколько взять)
+  """
+  getRecalls(filter: RecallFilterInput, skip: Float, sort: FieldSortInput, take: Float): [RecallGetModel!]!
+
+  """
+  Получение списка записей расписания  (фильтр, сортировка, пропустить, сколько взять)
+  """
+  getSchedules(filter: ScheduleFilterInput, skip: Float, sort: FieldSortInput, take: Float): [ScheduleModel!]!
+
+  """Поиск пользователя в AD по ФИО (cn) или логину (samaccountname)"""
+  searchUser(data: SearchCnInput!): [UserModel!]!
+}
+
+input RecallCreateInput {
+  """Описание/примечание к отзыву"""
+  description: String
+
+  """Дата окончания отзыва"""
+  endDate: DateTime!
+
+  """Номер приказа"""
+  order: String!
+
+  """Дата начала отзыва"""
+  startDate: DateTime!
+
+  """Статус отзыва (активен/неактивен)"""
+  status: Boolean
+}
+
+input RecallFilterInput {
+  createdAt: DateFilterInput
+  createdBy: StringFilterInput
+  description: StringFilterInput
+  endDate: DateFilterInput
+  id: String
+  order: StringFilterInput
+  scheduleId: StringFilterInput
+  startDate: DateFilterInput
+  status: Boolean
+  updatedAt: DateFilterInput
+  updatedBy: StringFilterInput
+}
+
+type RecallGetModel {
+  createdAt: DateTime!
+  createdBy: String!
+  description: String
+  endDate: DateTime!
+  id: String!
+  order: String!
+  scheduleId: String!
+  startDate: DateTime!
+  status: Boolean!
+  updatedAt: DateTime!
+  updatedBy: String!
+}
+
+input RecallUpdateInput {
+  """Описание/примечание к отзыву"""
+  description: String
+
+  """Дата окончания отзыва"""
+  endDate: DateTime
+
+  """Номер приказа"""
+  order: String
+
+  """Дата начала отзыва"""
+  startDate: DateTime
+
+  """Статус отзыва (активен/неактивен)"""
+  status: Boolean
+}
+
+input ScheduleCreateInput {
+  """Описание задачи (примечание)"""
+  description: String
+
+  """Дата окончания задачи (когда пользователь разблокируется)"""
+  endDate: DateTime!
+
+  """ФИО"""
+  fio: String!
+
+  """Отозван ли сотрудник из задачи (должен быть разблокирован)"""
+  isRecall: Boolean
+
+  """Логин пользователя латиницей"""
+  login: String!
+
+  """Номер приказа"""
+  order: String!
+
+  """Дата начала задачи (когда пользователь блокируется)"""
+  startDate: DateTime!
+
+  """Выполняется ли задача сейчас"""
+  status: Boolean
+
+  """Причина блокировки пользователя"""
+  type: TypeTaskEnum!
+}
+
+input ScheduleFilterInput {
+  createdAt: DateFilterInput
+  createdBy: StringFilterInput
+  endDate: DateFilterInput
+  fio: StringFilterInput
+  id: String
+  isRecall: Boolean
+  login: StringFilterInput
+  order: StringFilterInput
+  startDate: DateFilterInput
+  status: Boolean
+  type: TypeTaskEnum
+  updatedAt: DateFilterInput
+  updatedBy: StringFilterInput
+}
+
+type ScheduleModel {
+  createdAt: DateTime!
+  createdBy: String!
+  description: String
+  endDate: DateTime!
+  fio: String!
+  id: String!
+  login: String!
+  order: String!
+  recall: Boolean
+  startDate: DateTime!
+  status: Boolean
+  type: TypeTaskEnum!
+  updatedAt: DateTime!
+  updatedBy: String!
+}
+
+input ScheduleUpdateInput {
+  endDate: DateTime
+  fio: String
+  isRecall: Boolean
+  login: String
+  order: String
+  startDate: DateTime
+  status: Boolean
+  type: TypeTaskEnum
+}
+
+input SearchCnInput {
+  cnOrSamaccountname: String!
+}
+
+input StringFilterInput {
+  contains: String
+  endsWith: String
+  eq: String
+  startsWith: String
+}
+
+"""Тип причины отсутствия"""
+enum TypeTaskEnum {
+  DEKRET
+  KOMANDIROVKA
+  OTPYSK
+  PRODLENIE_OTPYSKA
+  SOC_OTPYSK
+  STAJIROVKA
+  UCHEBA
+}
+
+input UpdateInput {
+  """Имя домена сервера отдела/ПТО"""
+  domainName: String
+
+  """Адрес IP сервера отдела/ПТО"""
+  ipAddress: String
+
+  """Наименование отдела/ПТО"""
+  name: String
+}
+
+type UserModel {
+  cn: String
+  company: String
+  department: String
+  description: String
+  distinguishedName: String
+  logonHours: String
+  memberOf: String
+  sAMAccountName: String
+  title: String
+  userAccountControl: String
+}

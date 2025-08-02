@@ -1,0 +1,101 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DB_URL")
+  // provider = "mongodb"
+  // url      = env("DB_URL")
+}
+
+model Otdel {
+  id String @id @default(uuid())
+
+  name String @unique
+  ipAddress String @unique @map("ip_address")
+  domainName String @unique @map("domain_name")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  createdBy String @map("created_by")
+  updatedBy String @map("updated_by")
+
+  @@map("otdels")
+}
+
+model Schedule {
+  id String @id @default(uuid())
+
+  fio String
+  login String
+  startDate DateTime @map("start_date")
+  endDate DateTime @map("end_date")
+  order String
+  status Boolean @default(false)
+  isRecall Boolean @default(false) @map("is_recall")
+  type TypeTaskEnum @default(OTPYSK)
+  description String?
+
+  recall Recall?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  createdBy String @map("created_by")
+  updatedBy String @map("updated_by")
+
+  @@map("schedules")
+}
+
+model Recall {
+  id String @id @default(uuid())
+
+  order String
+  startDate DateTime @map("start_date")
+  endDate DateTime @map("end_date")
+  description String?
+  status Boolean @default(false)
+
+
+  schedule Schedule @relation(fields: [scheduleId], references: [id])
+  scheduleId String @unique @map("schedule_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  createdBy String @map("created_by")
+  updatedBy String @map("updated_by")
+
+  @@map("recalls")
+}
+
+model OneTime {
+  id String @id @default(uuid())
+
+  fio String
+  login String
+  state Boolean
+  date DateTime
+  isCompleate Boolean @default(false) @map("is_compleate")
+  description String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  createdBy String @map("created_by")
+  updatedBy String @map("updated_by")
+
+  @@map("one_times")
+}
+
+enum TypeTaskEnum {
+  DEKRET
+  SOC_OTPYSK
+  UCHEBA
+  OTPYSK
+  STAJIROVKA
+  PRODLENIE_OTPYSKA
+  KOMANDIROVKA
+}
