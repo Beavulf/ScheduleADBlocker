@@ -3,6 +3,10 @@ import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { Logger } from 'winston';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { LdapService } from 'src/ldap/ldap.service';
+import { handleTaskToStart } from './cron-task/task-to-start';
+import { handleTaskToEnd } from './cron-task/task-to-end';
+import { handleTaskToStartRecall } from './cron-task/task-to-start-recall';
+import { handleTaskToEndRecall } from './cron-task/task-to-end-recall';
 
 @Injectable()
 export class ScheduleCronTaskService {
@@ -18,92 +22,14 @@ export class ScheduleCronTaskService {
     })
     async handleScheduledTasks() {
         const start = new Date()
-        this.logger.info('Запуск задачи по обработке расписания блокировок...');
-        const today = new Date();
-        today.setHours(0, 0, 0, 0); // Обнуляем время для корректного сравнения дат
-
-        // 1. Найти задачи, которые должны начаться сегодня
-        const tasksToStart = await this.prismaService.schedule.findMany({
-            where: {
-                startDate: {
-                    lt: new Date(today.getTime() + 24 * 60 * 60 * 1000) // до конца сегодняшнего дня
-                },
-                endDate: {
-                    gte: today,
-                },
-                status: false, // Ищем только неактивные задачи
-                isRecall: false, // Которые не отозваны
-            }
-        });
-
-        // цикл блокировки пользователей на дату начала
-        for (const task of tasksToStart) {
-            this.logger.info(`Блокировка пользователя: ${task.login} по приказу ${task.order}`);
-            const findedUser = await this.ldapService.searchLdapUser(task.login);
-            const {distinguishedName} = findedUser[0]
-            if (!findedUser.length) {
-                this.logger.error(`Пользователь не найден в AD: ${task.login}`);
-                return;
-            }
-            if (!distinguishedName) {
-                this.logger.error(`Отсутствует distinguishedName для пользователя: ${task.login} - пользователь не будет заблокирован.`);
-                return;
-            }
-            // блокируем пользователя
-            await this.ldapService.enableOrDisableUser('514',{userDn:distinguishedName});
-
-            await this.prismaService.schedule.update({
-                where: { id: task.id },
-                data: { status: true, updatedBy: 'system' }
-            });
-            this.logger.info(`Пользователь успешно заблокирован: ${task.login}`);
-        }
-
-        // 2. Найти задачи, которые должны закончиться вчера
-        const yesterday = new Date();
-        yesterday.setDate(yesterday.getDate() - 1);
-        yesterday.setHours(0, 0, 0, 0);
-
-        const endOfYesterday = new Date(yesterday);
-        endOfYesterday.setHours(23, 59, 59, 999);
-
-        const tasksToEnd = await this.prismaService.schedule.findMany({
-            where: {
-                endDate: {
-                    gte: yesterday,
-                    lte: endOfYesterday
-                },
-                status: true, // Ищем только активные задачи
-                isRecall: false,
-            }
-        });
-
-        // цикл разблокировки пользователей на дату окончания
-        for (const task of tasksToEnd) {
-            this.logger.info(`Разблокировка пользователя: ${task.login} по приказу ${task.order}`);
-            const findedUser = await this.ldapService.searchLdapUser(task.login);
-            const {distinguishedName} = findedUser[0]
-
-            if (!findedUser.length) {
-                this.logger.error(`Пользователь не найден в AD: ${task.login}`);
-                return;
-            }
-            if (!distinguishedName) {
-                this.logger.error(`Отсутствует distinguishedName для пользователя: ${task.login} - пользователь не будет разблокирован.`);
-                return;
-            }
-
-            // блокируем пользователя
-            await this.ldapService.enableOrDisableUser('512',{userDn:distinguishedName});
-
-            await this.prismaService.schedule.update({
-                where: { id: task.id },
-                data: { status: false, updatedBy: 'system' }
-            });
-            this.logger.info(`Пользователь успешно разблокирован: ${task.login}`);
-        }
-        console.log(`(${Date.now() - start.getTime()}мс}).`);
+        this.logger.info('Запуск задачи по обработке расписания блокировок...', {label: 'cron'});
         
-        this.logger.info(`Задача по обработке расписания блокировок завершена (${Date.now() - start.getTime()}мс}).`);
+        await handleTaskToStartRecall.call(this);
+        await handleTaskToEndRecall.call(this);
+        await handleTaskToStart.call(this);
+        await handleTaskToEnd.call(this);
+        console.log(`${Date.now() - start.getTime()}мс`);
+        
+        this.logger.info(`Задача по обработке расписания блокировок завершена (${Date.now() - start.getTime()}мс).`, {label: 'cron'});
     }
 }

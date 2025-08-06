@@ -5,14 +5,36 @@ import 'winston-daily-rotate-file'; // важно для типов и рабо�
 export async function asyncWinstonConfig(configService: ConfigService) {
   return {
     transports: [
+      // Основной лог-файл для всех логов
       new winston.transports.DailyRotateFile({
         filename: configService.getOrThrow('LOGGER_PATH') + '%DATE%.log',
-        datePattern: 'YYYY-MM-DD', // или 'YYYY-ww' для недель
-        zippedArchive: true, // архивировать старые логи
-        maxSize: '20m', // максимальный размер одного файла
-        maxFiles: '14d', // хранить 14 дней, можно '7d', '30d', '2w' и т.д.
+        datePattern: 'YYYY-MM-DD',
+        zippedArchive: true,
+        maxSize: '20m',
+        maxFiles: '14d',
         level: 'info',
         format: winston.format.combine(
+          winston.format((info) => {
+            // Пропускаем все логи с label: 'cron'
+            return info.label === 'cron' ? false : info;
+          })(),
+          winston.format.timestamp(),
+          winston.format.json(),
+        ),
+      }),
+      // Отдельный лог-файл только для крон-задач (label: 'cron')
+      new winston.transports.DailyRotateFile({
+        filename: configService.getOrThrow('LOGGER_CRON_PATH') + '%DATE%.log',
+        datePattern: 'YYYY-MM-DD',
+        zippedArchive: true,
+        maxSize: '20m',
+        maxFiles: '14d',
+        level: 'info',
+        format: winston.format.combine(
+          winston.format((info) => {
+            // Пропускаем все логи, кроме label: 'cron'
+            return info.label === 'cron' ? info : false;
+          })(),
           winston.format.timestamp(),
           winston.format.json(),
         ),

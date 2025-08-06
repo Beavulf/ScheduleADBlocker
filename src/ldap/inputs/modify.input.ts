@@ -10,9 +10,6 @@ export class ModifyInput {
     @MinLength(3, {
         message: 'Минимальная длинна 3 символа'
     })
-    @MaxLength(156, {
-        message: 'Максимальная длинна 156 символов'
-    })
     @Field(()=>String,{
         description: 'Путь до пользователя в АД'
     })

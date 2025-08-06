@@ -58,7 +58,6 @@ model Recall {
   description String?
   status Boolean @default(false)
 
-
   schedule Schedule @relation(fields: [scheduleId], references: [id])
   scheduleId String @unique @map("schedule_id")
 

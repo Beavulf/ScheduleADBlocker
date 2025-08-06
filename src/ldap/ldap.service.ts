@@ -167,7 +167,7 @@ export class LdapService {
         });
     }
 
-    // включение или отключение пользователя
+    // включение или отключение пользователя 514 off 512 on
     async enableOrDisableUser(state: string, userDn: ModifyInput): Promise<boolean> {
         const client = await this.createAndBindLdapClient();
         try {
