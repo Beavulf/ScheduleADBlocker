@@ -12,7 +12,9 @@ import { GetAuthUserName } from 'src/common/decorators/get-auth-username';
 export class OtdelResolver {
   constructor(private readonly otdelService: OtdelService) {}
 
-  @Mutation(()=> Boolean)
+  @Mutation(()=>Boolean, {
+    description:"Создать новый отдел"
+  })
   async createOtdel(
     @Args('data') input: CreateInput, 
     @GetAuthUserName() authUsername: string
@@ -20,7 +22,9 @@ export class OtdelResolver {
     return await this.otdelService.create(input, authUsername)
   }
 
-  @Mutation(()=> Boolean)
+  @Mutation(()=> Boolean, {
+    description:"Изменить отдел"
+  })
   async updateOtdel(
     @Args('id', {type: ()=> ID}) id: string,
     @Args('data') input: UpdateInput, 
@@ -29,7 +33,9 @@ export class OtdelResolver {
     return await this.otdelService.update(id, input, authUsername)
   }
 
-  @Mutation(()=> Boolean)
+  @Mutation(()=> Boolean,{
+    description: "Удалить отдел из БД"
+  })
   async deleteOtdel(
     @Args('id', {type: ()=> ID}) id: string, 
     @GetAuthUserName() authUsername: string,

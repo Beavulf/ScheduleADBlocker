@@ -60,7 +60,7 @@ export class OtdelService {
             updatedBy: authUsername
         }
         try {
-            const updatedOtdel = await this.prismaService.otdel.update({
+            await this.prismaService.otdel.update({
                 where: {
                     id
                 },
