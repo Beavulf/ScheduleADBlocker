@@ -2,7 +2,7 @@ import { Args, ID, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { RecallService } from './recall.service';
 import { RecallCreateInput } from './inputs/create.input';
 import { GetAuthUserName } from 'src/common/decorators/get-auth-username';
-import { UseGuards } from '@nestjs/common';
+import { NotFoundException, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RecallUpdateInput } from './inputs/update.input';
 import { RecallFilterInput } from './inputs/filter.input';
@@ -59,5 +59,18 @@ export class RecallResolver {
     @Args('take', { nullable: true }) take?: number,
   ) {
     return await this.recallService.getRecalls({ filter, sort, skip, take })
+  }
+
+  @Mutation(()=>Boolean, {
+    description: 'Архивирование отзыва по айди'
+  })
+  async recallArchive(
+    @Args('id', {type: ()=> ID}) id: string,
+  ) {
+    const isArchive = await this.recallService.toArchive(id)
+    if(!isArchive) {
+      throw new NotFoundException(`Ошибка архивирования отзыва ${id}`)
+    }
+    return isArchive
   }
 }

@@ -5,8 +5,6 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DB_URL")
-  // provider = "mongodb"
-  // url      = env("DB_URL")
 }
 
 model Otdel {
@@ -46,7 +44,41 @@ model Schedule {
   createdBy String @map("created_by")
   updatedBy String @map("updated_by")
 
+  @@index([startDate, endDate]) // Для поиска по диапазону дат
+  @@index([status]) // Для фильтрации по статусу
+  @@index([type]) // Для фильтрации по типу задачи
+  @@index([login]) // Для поиска по логину пользователя
+  @@index([createdAt]) // Для сортировки по дате создания
+
   @@map("schedules")
+}
+
+model ArchiveSchedule {
+  id String @id @default(uuid())
+
+  fio String
+  login String
+  startDate DateTime @map("start_date")
+  endDate DateTime @map("end_date")
+  order String
+  status Boolean
+  isRecall Boolean @map("is_recall")
+  type TypeTaskEnum
+  description String?
+
+  createdAt DateTime @map("created_at")
+  updatedAt DateTime @map("updated_at")
+
+  createdBy String @map("created_by")
+  updatedBy String @map("updated_by")
+
+  @@index([startDate, endDate]) // Для поиска по диапазону дат
+  @@index([status]) // Для фильтрации по статусу
+  @@index([type]) // Для фильтрации по типу задачи
+  @@index([login]) // Для поиска по логину пользователя
+  @@index([createdAt]) // Для сортировки по дате создания
+
+  @@map("archive_schedules")
 }
 
 model Recall {
@@ -58,7 +90,7 @@ model Recall {
   description String?
   status Boolean @default(false)
 
-  schedule Schedule @relation(fields: [scheduleId], references: [id])
+  schedule Schedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
   scheduleId String @unique @map("schedule_id")
 
   createdAt DateTime @default(now()) @map("created_at")
@@ -67,7 +99,35 @@ model Recall {
   createdBy String @map("created_by")
   updatedBy String @map("updated_by")
 
+  @@index([startDate, endDate]) // Для поиска по диапазону дат
+  @@index([status]) // Для фильтрации по статусу
+  @@index([order]) // Для поиска по номеру приказа
+
   @@map("recalls")
+}
+
+model ArchiveRecall {
+  id String @id @default(uuid())
+
+  order String
+  startDate DateTime @map("start_date")
+  endDate DateTime @map("end_date")
+  description String?
+  status Boolean
+
+  scheduleId String @map("schedule_id")
+
+  createdAt DateTime @map("created_at")
+  updatedAt DateTime @map("updated_at")
+
+  createdBy String @map("created_by")
+  updatedBy String @map("updated_by")
+
+  @@index([startDate, endDate]) // Для поиска по диапазону дат
+  @@index([status]) // Для фильтрации по статусу
+  @@index([order]) // Для поиска по номеру приказа
+
+  @@map("archive_recalls")
 }
 
 model OneTime {
@@ -86,7 +146,36 @@ model OneTime {
   createdBy String @map("created_by")
   updatedBy String @map("updated_by")
 
+  @@index([date]) // Для поиска по дате
+  @@index([state]) // Для фильтрации по состоянию
+  @@index([isCompleate]) // Для фильтрации по статусу выполнения
+  @@index([login]) // Для поиска по логину
+
   @@map("one_times")
+}
+
+model ArchiveOneTime {
+  id String @id @default(uuid())
+
+  fio String
+  login String
+  state Boolean
+  date DateTime
+  isCompleate Boolean @map("is_compleate")
+  description String?
+
+  createdAt DateTime @map("created_at")
+  updatedAt DateTime @map("updated_at")
+
+  createdBy String @map("created_by")
+  updatedBy String @map("updated_by")
+
+  @@index([date]) // Для поиска по дате
+  @@index([state]) // Для фильтрации по состоянию
+  @@index([isCompleate]) // Для фильтрации по статусу выполнения
+  @@index([login]) // Для поиска по логину
+
+  @@map("archive_one_times")
 }
 
 enum TypeTaskEnum {

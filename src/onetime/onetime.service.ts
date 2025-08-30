@@ -141,4 +141,63 @@ export class OnetimeService {
 
         return oneTimes
     }
+
+    /**
+     * Переносит разовую задачу в архив и удаляет её из основной таблицы.
+     * Операция выполняется в транзакции: если задача не найдена — возвращает false.
+     * В случае успеха возвращает true, иначе логирует ошибку и возвращает false.
+     * @param id - идентификатор разовой задачи
+     */
+    async toArchive(id: string) {
+        try {
+            // Транзакция: найти задачу, скопировать в архив, удалить из основной таблицы
+            const isCompleate = await this.prismaService.$transaction(async (tx) => {
+                // Поиск разовой задачи по id
+                const oneTime = await tx.oneTime.findUnique({
+                    where: { id }
+                });
+
+                // Если задача не найдена — выход
+                if (!oneTime) {
+                    return false;
+                }
+
+                // Копирование задачи в архивную таблицу
+                await tx.archiveOneTime.create({
+                    data: { 
+                        id: oneTime.id,
+                        fio: oneTime.fio,
+                        login: oneTime.login,
+                        state: oneTime.state,
+                        date: oneTime.date,
+                        isCompleate: true,
+                        description: oneTime.description,
+                        createdAt: oneTime.createdAt,
+                        updatedAt: oneTime.updatedAt,
+                        createdBy: oneTime.createdBy,
+                        updatedBy: oneTime.updatedBy
+                    }
+                });
+
+                // Удаление задачи из основной таблицы
+                await tx.oneTime.delete({
+                    where: { id: oneTime.id }
+                });
+
+                return true;
+            });
+
+            // Логирование успешного архивирования
+            this.logger.info(`Архивирование и обновление выполнено (Разовая): ${id}`, { label: 'cron' });
+
+            return isCompleate;
+        } catch (err) {
+            // Логирование ошибки при архивировании
+            this.logger.error(
+                `Ошибка при архивировании/обновлении в БД (Разовая) (${id}) — ${err.message}`,
+                { label: 'cron' }
+            );
+            return false;
+        }
+    }
 }

@@ -1,11 +1,12 @@
-import { NotFoundUserToFile } from "./not-found-file";
+import enableOrDisableUser from "../cron-task/disableOrEnableUser";
 
 export async function handleTaskToStartRecall() {
+    // 1) Рассчитываем границы текущего дня
     const today = new Date();
     today.setHours(0, 0, 0, 0); // Обнуляем время для корректного сравнения дат
 
-    this.logger.info('Запуск задачи по обработке расписания отзывов (раблокировка)...', {label: 'cron'});
-    // 1. Найти задачи, которые должны начаться сегодня
+    this.logger.info('Запуск задачи по обработке расписания отзывов (разблокировка)...', {label: 'cron'});
+    // 2) Находим задачи (recall), которые должны начаться сегодня
     const tasksToStartRecall = await this.prismaService.recall.findMany({
         where: {
             startDate: {
@@ -14,59 +15,27 @@ export async function handleTaskToStartRecall() {
             endDate: {
                 gte: today,
             },
-            status: false, // Ищем только активные задачи
+            status: false, // Ищем только неактивные (ещё не обработанные) задачи
         },
         include: {
             schedule: true
         }
     });
 
-    // цикл блокировки пользователей на дату начала
+    // 3) Проходим по найденным recall-задачам: разблокируем пользователя и обновляем статусы
     for (const task of tasksToStartRecall) {
-        let findedUser;
-       
-        this.logger.info(`Раблокировка пользователя (Отзыв): ${task.schedule.login} по приказу ${task.order}`, {label: 'cron'});
-        // поиск пользователя
-        try{
-            findedUser = await this.ldapService.searchLdapUser(task.schedule.login);
-        }
-        catch(err){
-            this.logger.error(
-                `Ошибка при поиске пользователя в АД (Отзыв):  — ${err.message}`,
-                { label: 'cron' }
-            );
+        // функция включение или отключения пользователя в АД
+        const ok = await enableOrDisableUser(
+            { logger: this.logger, ldapService: this.ldapService },
+            task,
+            '512',
+            true
+        );
+        if (!ok) {
             continue;
         }
 
-        if (!findedUser.length) {
-            this.logger.error(`Пользователь не найден в AD (Отзыв): ${task.schedule.login}`, {label: 'cron'});
-            await NotFoundUserToFile(task.fio, task.schedule.login, 'раблокировка - Отзыв');
-            continue; // продолжаем обработку остальных задач
-        }
-
-        const {distinguishedName} = findedUser[0]
-
-        if (!distinguishedName) {
-            this.logger.error(`Отсутствует distinguishedName для пользователя: ${task.schedule.login} - пользователь не будет разблокирован (Отзыв).`, {label: 'cron'});
-            await NotFoundUserToFile(task.fio, task.schedule.login, 'отсутствует distinguishedName, раблокировка - Отзыв');
-            continue;
-        }
-
-        // раблокируем пользователя в АД
-        try {
-            await this.ldapService.enableOrDisableUser('512',{userDn:distinguishedName});
-            this.logger.info(`Пользователь успешно разблокирован (Отзыв): ${task.schedule.login} - ${distinguishedName}`, {label: 'cron'});
-        }
-        catch(err) {
-            await NotFoundUserToFile(task.fio, task.schedule.login, 'ошибка разблокировки АД, раблокировка - Отзыв');
-            this.logger.error(
-                `Ошибка при разблокировке пользователя в АД (Отзыв):  — ${err.message}`,
-                { label: 'cron' }
-            );
-            continue;
-        }
-
-        // Обновление статусов recall и schedule должно быть атомарным — используем транзакцию
+        // 3.4) Обновляем статусы recall и schedule в одной транзакции (атомарно)
         try {
             await this.prismaService.$transaction([
                 this.prismaService.recall.update({
@@ -79,7 +48,7 @@ export async function handleTaskToStartRecall() {
                 })
             ]);
 
-            this.logger.info(`Измнения в БД внесены (Отзыв): recallId=${task.id}, scheduleId=${task.scheduleId}`, {label: 'cron'});
+            this.logger.info(`Изменения в БД внесены (Отзыв): recallId=${task.id}, scheduleId=${task.scheduleId}`, {label: 'cron'});
         }
         catch(error) {
             this.logger.error(

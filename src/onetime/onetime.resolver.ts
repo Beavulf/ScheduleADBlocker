@@ -1,7 +1,7 @@
 import { Args, ID, Mutation, Resolver, Query } from '@nestjs/graphql';
 import { OnetimeService } from './onetime.service';
 import { OneTimeCreateInput } from './inputs/create.input';
-import { UseGuards } from '@nestjs/common';
+import { NotFoundException, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { GetAuthUserName } from 'src/common/decorators/get-auth-username';
 import { OneTimeFilterInput } from './inputs/filter.input';
@@ -58,5 +58,18 @@ export class OnetimeResolver {
     @Args('take', { nullable: true }) take?: number,
   ) {
     return await this.onetimeService.getOneTimes({ filter, sort, skip, take })
+  }
+
+  @Mutation(()=>Boolean, {
+    description: 'Архивация разовой задачи'
+  })
+  async archiveOneTime(
+    @Args('id',{type: ()=> ID}) id: string,
+  ) {
+    const isArchive = await this.onetimeService.toArchive(id)
+    if(!isArchive){
+      throw new NotFoundException(`Ошибка при архивации задачи ${id}`)
+    }
+    return isArchive
   }
 }

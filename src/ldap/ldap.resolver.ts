@@ -6,14 +6,12 @@ import { ModifyInput } from './inputs/modify.input';
 import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
-
+@UseGuards(JwtAuthGuard)
 @Resolver()
 export class LdapResolver {
   constructor(private readonly ldapService: LdapService) {}
 
-  @UseGuards(JwtAuthGuard)
   @Query(() => [UserModel],{
-    name: 'searchUser',
     description: 'Поиск пользователя в AD по ФИО (cn) или логину (samaccountname)'
   })
   async searchUser(@Args('data') input:SearchCnInput) {
@@ -21,18 +19,14 @@ export class LdapResolver {
     return await this.ldapService.searchLdapUser(cnOrSamaccountname);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Mutation(() => Boolean, {
-    name: 'enableUser',
     description: 'Включение пользователя в AD'
   })
   async enableUser(@Args('data') userDn: ModifyInput){
     return await this.ldapService.enableOrDisableUser('512', userDn)
   }
 
-  @UseGuards(JwtAuthGuard)
   @Mutation(() => Boolean, {
-    name: 'disableUser',
     description: 'Отключение пользователя в AD'
   })
   async disableUser(@Args('data') userDn: ModifyInput){

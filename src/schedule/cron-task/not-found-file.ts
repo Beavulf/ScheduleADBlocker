@@ -12,7 +12,7 @@ export async function NotFoundUserToFile(fio: string, login: string, description
     const fileName = `not-found-in-ad-${year}-${month}-${day}.txt`;
     const notFoundFilePath = path.resolve(__dirname, process.env.LOGGER_NOTFOUND_USER_PATH, fileName);
 
-    // Добавляем фамилию (fio, login) в файл, каждая с новой строки, с обработкой ошибок
+    // Добавляем запись в файл (fio, login, описание) новой строкой; оборачиваем ошибки в InternalServerErrorException
     try {
         await fs.appendFile(
             notFoundFilePath,
@@ -20,6 +20,6 @@ export async function NotFoundUserToFile(fio: string, login: string, description
             { encoding: 'utf8' }
         );
     } catch (error) {
-        throw new InternalServerErrorException(`Ошибка при записи в файл not-found-in-ad: ${error.message}`);
+        console.warn(`Не удалось записать в not-found-in-ad: ${error.message}`);
     }
 }

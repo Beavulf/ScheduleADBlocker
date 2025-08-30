@@ -50,7 +50,7 @@ export class OneTimeCreateInput {
     @IsDate({
         message: 'Поле даты должно быть датой'
     })
-    @MinDate(new Date(), {
+    @MinDate(new Date(new Date().setHours(0,0,0,0)), {
         message: 'Дата не может быть в прошлом'
     })
     @Field(()=>Date, {

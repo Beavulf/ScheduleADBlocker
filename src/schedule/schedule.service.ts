@@ -13,7 +13,7 @@ export class ScheduleService {
     constructor(
         private readonly prismaService: PrismaService,
         @Inject('winston') private readonly logger: Logger,
-        private readonly ldapService: LdapService, // Предполагаем, что у вас есть такой сервис
+        private readonly ldapService: LdapService,
 
     ) {}
 
@@ -141,6 +141,93 @@ export class ScheduleService {
             this.logger.error(`Ошибка при работе с БД (изменение записи расписания): ${err.message}`);
             throw new InternalServerErrorException(`Ошибка при работе с БД - ${err.code}`)
         }
+    }
 
+    // отправка задачи в архив, если есть отзыв он тоже идет в архив
+    /**
+     * Архивирует запись расписания и, при необходимости, связанный отзыв.
+     *
+     * Операция выполняется в транзакции:
+     * 1. Находит запись расписания по id (включая отзыв, если есть).
+     * 2. Если отзыв присутствует и требуется архивировать (recallToArchive === true), переносит отзыв в архив.
+     * 3. Переносит саму запись расписания в архив.
+     * 4. Удаляет исходную запись расписания (и отзыв, если был).
+     *
+     * @param id - идентификатор записи расписания для архивирования
+     * @param shouldArchiveRecall - если true, архивирует также связанный отзыв (если он есть)
+     * @returns true, если архивирование прошло успешно, иначе false
+     */
+    async toArchive(id: string, shouldArchiveRecall: boolean = true): Promise<boolean> {
+        try {
+            const isCompleate = await this.prismaService.$transaction(async (tx) => {
+                // Получаем запись расписания с потенциальным отзывом
+                const schedule = await tx.schedule.findUnique({
+                    where: { id },
+                    include: { recall: true }
+                });
+
+                if (!schedule) {
+                    return false;
+                }
+
+                if (schedule.recall && shouldArchiveRecall) {
+                    // Архивируем отзыв
+                    await tx.archiveRecall.create({
+                        data: {
+                            id: schedule.recall.id,
+                            order: schedule.recall.order,
+                            startDate: schedule.recall.startDate,
+                            endDate: schedule.recall.endDate,
+                            description: schedule.recall.description,
+                            status: schedule.recall.status,
+                            scheduleId: schedule.recall.scheduleId,
+                            createdAt: schedule.recall.createdAt,
+                            updatedAt: schedule.recall.updatedAt,
+                            createdBy: schedule.recall.createdBy,
+                            updatedBy: schedule.recall.updatedBy
+                        }
+                    });
+                    this.logger.info(
+                        `Найденный отзыв задачи был отправлен в архив: задача - ${id}, отзыв - ${schedule.recall.id}`,
+                        { label: 'cron' }
+                    );
+                }
+
+                // Архивируем саму задачу
+                await tx.archiveSchedule.create({
+                    data: {
+                        id: schedule.id,
+                        fio: schedule.fio,
+                        login: schedule.login,
+                        startDate: schedule.startDate,
+                        endDate: schedule.endDate,
+                        order: schedule.order,
+                        status: schedule.status,
+                        isRecall: schedule.isRecall,
+                        type: schedule.type,
+                        description: schedule.description,
+                        createdAt: schedule.createdAt,
+                        updatedAt: schedule.updatedAt,
+                        createdBy: schedule.createdBy,
+                        updatedBy: schedule.updatedBy
+                    }
+                });
+
+                // Удаляем исходную задачу (и отзыв, если был)
+                await tx.schedule.delete({
+                    where: { id }
+                });
+                return true;
+            });
+
+            this.logger.info(`Архивирование и обновление выполнено: ${id}`, { label: 'cron' });
+            return isCompleate;
+        } catch (err) {
+            this.logger.error(
+                `Ошибка при обновлении статусов и архивации записи в БД (${id}) — ${err.message}`,
+                { label: 'cron' }
+            );
+            return false;
+        }
     }
 }

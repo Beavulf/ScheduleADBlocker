@@ -6,6 +6,8 @@ import { TypeTaskEnum } from '@prisma/client';
 import { ScheduleModule as NestScheduleModule } from '@nestjs/schedule';
 import { LdapModule } from 'src/ldap/ldap.module';
 import { ScheduleCronTaskService } from './cron-task.service';
+import { OnetimeService } from 'src/onetime/onetime.service';
+import { RecallService } from 'src/recall/recall.service';
 
 registerEnumType(TypeTaskEnum, {
   name: 'TypeTaskEnum',
@@ -14,6 +16,12 @@ registerEnumType(TypeTaskEnum, {
 
 @Module({
   imports: [NestScheduleModule.forRoot(), LdapModule],
-  providers: [ScheduleResolver, ScheduleService, ScheduleCronTaskService],
+  providers: [
+    ScheduleResolver, 
+    ScheduleService, 
+    ScheduleCronTaskService, 
+    OnetimeService,
+    RecallService
+  ],
 })
 export class ScheduleModule {}

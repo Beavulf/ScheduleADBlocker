@@ -14,6 +14,7 @@ import { OtdelModule } from './otdel/otdel.module';
 import { ScheduleModule } from './schedule/schedule.module';
 import { RecallModule } from './recall/recall.module';
 import { OnetimeModule } from './onetime/onetime.module';
+import { ScheduleModule as NestScheduleModule } from '@nestjs/schedule';
 
 
 @Module({
@@ -31,6 +32,7 @@ import { OnetimeModule } from './onetime/onetime.module';
       useFactory: asyncWinstonConfig,
       inject: [ConfigService]
     }),
+    NestScheduleModule.forRoot(),
     AuthModule,
     LdapModule,
     OtdelModule,

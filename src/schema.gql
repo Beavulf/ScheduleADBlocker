@@ -37,6 +37,15 @@ type CreateModel {
   updatedBy: String!
 }
 
+type CronTaskInfoModel {
+  getTimeout: String!
+  isActive: Boolean!
+  lastDate: DateTime
+  nextDate: DateTime
+  sendAt: String!
+  source: String!
+}
+
 input DateFilterInput {
   eq: DateTime
   gt: DateTime
@@ -66,6 +75,17 @@ input ModifyInput {
 }
 
 type Mutation {
+  """Архивация разовой задачи"""
+  archiveOneTime(id: ID!): Boolean!
+
+  """
+  Архивирование записи расписания с указанием необходимо ли отправлять в архив связанный отзыв
+  """
+  archiveSchedule(id: ID!, shouldArchiveRecall: Boolean!): Boolean!
+
+  """
+  Аавторизация пользователя по его Логину и Паролю из АД, возврат токена доступа.
+  """
   auth(data: LoginInput!): AuthModel!
 
   """Создание разовой задачи"""
@@ -93,8 +113,24 @@ type Mutation {
 
   """Включение пользователя в AD"""
   enableUser(data: ModifyInput!): Boolean!
+
+  """Горячий запуск задачи (выполнить прямо сейчас)"""
+  fireOnTick(taskName: String!): Boolean!
+
+  """Деавторизация (выход) пользователя из программы."""
   logout: Boolean!
+
+  """Архивирование отзыва по айди"""
+  recallArchive(id: ID!): Boolean!
+
+  """Обновление токена доступа пользователя через Рефреш токен в куках."""
   refreshToken: AuthModel!
+
+  """Запустить задачу раписания"""
+  startTaskSchedule(taskName: String!): Boolean!
+
+  """Остановить задачу раписания"""
+  stopTaskSchedule(taskName: String!): Boolean!
 
   """Изменение разовой задачи"""
   updateOneTime(data: OneTimeUpdateInput!, id: ID!): Boolean!
@@ -105,6 +141,9 @@ type Mutation {
 
   """Изменение записи расписания"""
   updateSchedule(data: ScheduleUpdateInput!, id: ID!): Boolean!
+
+  """Изменить расписание выполнения cron задачи"""
+  updateTaskSchedule(cronExpression: String!, taskName: String!, timeZone: String): Boolean!
 }
 
 input OneTimeCreateInput {
@@ -218,6 +257,9 @@ input OneTimeUpdateInput {
 }
 
 type Query {
+  """Получение информации о задаче расписания"""
+  getCronTaskInfo(taskName: String!): CronTaskInfoModel!
+
   """
   Получение списка отзывов (фильтр, сортировка, пропустить, сколько взять)
   """
@@ -232,7 +274,7 @@ type Query {
   getRecalls(filter: RecallFilterInput, skip: Float, sort: FieldSortInput, take: Float): [RecallGetModel!]!
 
   """
-  Получение списка записей расписания  (фильтр, сортировка, пропустить, сколько взять)
+  Получение списка записей расписания (фильтр, сортировка, пропустить, сколько взять)
   """
   getSchedules(filter: ScheduleFilterInput, skip: Float, sort: FieldSortInput, take: Float): [ScheduleModel!]!
 
