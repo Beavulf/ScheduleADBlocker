@@ -13,15 +13,6 @@ export class OneTimeFilterInput {
     id?: string;
 
     @IsOptional()
-    @IsString({
-        message: 'Поле ФИО должно быть строкой'
-    })
-    @MinLength(6, {
-        message: 'Минимальная длина ФИО - 6 символов'
-    })
-    @MaxLength(250, {
-        message: 'Максимальная длина ФИО - 250 символов'
-    })
     @Field(()=>StringFilterInput, {
         description: 'ФИО пользователя',
         nullable: true
@@ -29,15 +20,6 @@ export class OneTimeFilterInput {
     fio?: StringFilterInput;
 
     @IsOptional()
-    @IsString({
-        message: 'Поле логина должно быть строкой'
-    })
-    @MinLength(4, {
-        message: 'Минимальная длина логина - 4 символа'
-    })
-    @MaxLength(40, {
-        message: 'Максимальная длина логина - 40 символов'
-    })
     @Field(()=>StringFilterInput, {
         description: 'Логин пользователя',
         nullable: true
@@ -53,12 +35,6 @@ export class OneTimeFilterInput {
     state?: boolean
 
     @IsOptional()
-    @IsDate({
-        message: 'Поле даты должно быть датой'
-    })
-    @MinDate(new Date(), {
-        message: 'Дата не может быть в прошлом'
-    })
     @Field(()=>DateFilterInput, {
         description: 'Дата выполнения задачи',
         nullable: true
@@ -73,12 +49,6 @@ export class OneTimeFilterInput {
     isCompleate?: boolean;
 
     @IsOptional()
-    @IsString({
-        message: 'Поле описания должно быть строкой'
-    })
-    @MaxLength(256, {
-        message: 'Максимальная длина описания - 256 символов'
-    })
     @Field(()=>StringFilterInput, {
         description: 'Описание задачи',
         nullable: true

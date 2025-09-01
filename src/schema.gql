@@ -90,6 +90,8 @@ type Mutation {
 
   """Создание разовой задачи"""
   craeteOneTime(data: OneTimeCreateInput!): Boolean!
+
+  """Создать новый отдел"""
   createOtdel(data: CreateInput!): Boolean!
 
   """Создание отзыва"""
@@ -100,6 +102,8 @@ type Mutation {
 
   """Удаление разовой задачи"""
   deleteOneTime(id: ID!): Boolean!
+
+  """Удалить отдел из БД"""
   deleteOtdel(id: ID!): Boolean!
 
   """Удаление отзыва"""
@@ -134,6 +138,8 @@ type Mutation {
 
   """Изменение разовой задачи"""
   updateOneTime(data: OneTimeUpdateInput!, id: ID!): Boolean!
+
+  """Изменить отдел"""
   updateOtdel(data: UpdateInput!, id: ID!): Boolean!
 
   """Изменение отзыва"""
@@ -257,13 +263,16 @@ input OneTimeUpdateInput {
 }
 
 type Query {
+  """Получение списка разовых задач из архиве"""
+  getArchiveOneTimes(filter: OneTimeFilterInput, skip: Float, sort: FieldSortInput = {field: "createdAt", order: "desc"}, take: Float): [OneTimeGetModel!]!
+
   """Получение информации о задаче расписания"""
   getCronTaskInfo(taskName: String!): CronTaskInfoModel!
 
   """
   Получение списка отзывов (фильтр, сортировка, пропустить, сколько взять)
   """
-  getOneTimes(filter: OneTimeFilterInput, skip: Float, sort: FieldSortInput, take: Float): [OneTimeGetModel!]!
+  getOneTimes(filter: OneTimeFilterInput, skip: Float, sort: FieldSortInput = {field: "createdAt", order: "desc"}, take: Float): [OneTimeGetModel!]!
 
   """Получение списка отделов/ПТО"""
   getOtdels: [CreateModel!]!

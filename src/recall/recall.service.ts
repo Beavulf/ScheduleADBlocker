@@ -57,31 +57,25 @@ export class RecallService {
             throw new ConflictException('Отзыв на эту запись уже существует');
         }
 
-        try {
-            // Создаём новый отзыв в базе данных
-            const createdRecall = await this.prismaService.recall.create({
-                data: {
-                    ...input,
-                    createdBy: authUsername,
-                    updatedBy: authUsername,
-                    schedule: {
-                        connect: {
-                            id: idSchedule
-                        }
+        // Создаём новый отзыв в базе данных
+        const createdRecall = await this.prismaService.recall.create({
+            data: {
+                ...input,
+                createdBy: authUsername,
+                updatedBy: authUsername,
+                schedule: {
+                    connect: {
+                        id: idSchedule
                     }
-                },
-                include: {
-                    schedule: true
                 }
-            });
+            },
+            include: {
+                schedule: true
+            }
+        });
 
-            this.logger.info(`Запись расписания создана: ID ${idSchedule} - ${createdRecall.order} пользователем ${authUsername}`);
-
-            return true;
-        } catch (err) {
-            this.logger.error(`Ошибка при работе с БД (создание записи расписания): ${err.message} пользователем ${authUsername}`);
-            throw new InternalServerErrorException(`Ошибка при работе с БД - ${err.code}`);
-        }
+        this.logger.info(`Запись расписания создана: ID ${idSchedule} - ${createdRecall.order} пользователем ${authUsername}`);
+        return true;
     }
 
     /**
@@ -91,16 +85,10 @@ export class RecallService {
      * @returns найденный отзыв с данными расписания
      */
     async findById(id: string) {
-        const findedRecall = await this.prismaService.recall.findUnique({
+        const findedRecall = await this.prismaService.recall.findUniqueOrThrow({
             where: { id },
             include: { schedule: true }
         });
-
-        if (!findedRecall) {
-            this.logger.warn(`Запись расписания не найдена: ${id}`);
-            throw new NotFoundException('Запись расписания не найдена');
-        }
-
         return findedRecall;
     }
 
@@ -112,30 +100,20 @@ export class RecallService {
      * @param id - идентификатор отзыва
      * @param authUsername - имя пользователя, выполняющего удаление
      */
-    async delete(id: string, authUsername: string): Promise<boolean> {
+    async delete(id: string, authUsername: string):Promise<boolean> {
         // Проверяем, существует ли отзыв с таким id
-        const findedRecall = await this.findById(id);
+        await this.findById(id);
 
-        try {
-            // Удаляем отзыв из базы данных
-            const deletedRecall = await this.prismaService.recall.delete({
-                where: { id },
-                include: { schedule: true }
-            });
+        // Удаляем отзыв из базы данных
+        const deletedRecall = await this.prismaService.recall.delete({
+            where: { id },
+            include: { schedule: true }
+        });
 
-            this.logger.info(
-                `Запись об отзыве удалена: ${deletedRecall.schedule.fio} - ${deletedRecall.order} пользователем ${authUsername}`
-            );
-
-            return true;
-        } catch (err) {
-            this.logger.error(
-                `Ошибка при работе с БД (удаление записи отзыва): ${err.message}`
-            );
-            throw new InternalServerErrorException(
-                `Ошибка при работе с БД - ${err.code}`
-            );
-        }
+        this.logger.info(
+            `Запись об отзыве удалена: ${deletedRecall.schedule.fio} - ${deletedRecall.order} пользователем ${authUsername}`
+        );
+        return true;
     }
     
     // изменение отзыва
@@ -147,34 +125,23 @@ export class RecallService {
      * @param input - данные для обновления отзыва
      * @param authUsername - имя пользователя, выполняющего обновление
      */
-    async update(id: string, input: RecallUpdateInput, authUsername: string): Promise<boolean> {
+    async update(id: string, input: RecallUpdateInput, authUsername: string):Promise<boolean> {
         // Проверяем, существует ли отзыв с таким id
-        const findedRecall = await this.findById(id);
-
+        await this.findById(id);
         const data = {
             ...input,
             updatedBy: authUsername
         };
 
-        try {
-            // Обновляем отзыв в базе данных
-            const updatedRecall = await this.prismaService.recall.update({
-                where: { id },
-                data,
-                include: { schedule: true }
-            });
+        // Обновляем отзыв в базе данных
+        const updatedRecall = await this.prismaService.recall.update({
+            where: { id },
+            data,
+            include: { schedule: true }
+        });
 
-            this.logger.info(`Запись об отзыве изменена`);
-
-            return true;
-        } catch (err) {
-            this.logger.error(
-                `Ошибка при работе с БД (изменение записи отзыва): ${err.message}`
-            );
-            throw new InternalServerErrorException(
-                `Ошибка при работе с БД - ${err.code}`
-            );
-        }
+        this.logger.info(`Запись об отзыве изменена - ${updatedRecall.order} пользователем ${authUsername}`);
+        return true;
     }
 
     /**
@@ -195,7 +162,7 @@ export class RecallService {
         const { filter, sort, skip, take } = options || {};
         const recalls: RecallGetModel[] = await this.prismaService.recall.findMany({
             where: filter,
-            orderBy: sort,
+            orderBy: sort ? { [sort.field]: sort.order || 'asc' } : undefined,
             skip,
             take,
             include: {
@@ -204,11 +171,9 @@ export class RecallService {
         });
 
         this.logger.info(`Получение списка отзывов`);
-
         return recalls;
     }
 
-    // получение всех отзывов по ФИО
     /**
      * Получает список отзывов по ФИО сотрудника (и опционально по статусу).
      * 
@@ -227,7 +192,6 @@ export class RecallService {
         });
 
         this.logger.info(`Получение списка отзывов по ФИО - ${fio}`);
-
         return recalls;
     }
 
@@ -254,6 +218,7 @@ export class RecallService {
 
                 if (!recall) {
                     // Если отзыв не найден — возвращаем false
+                    this.logger.warn(`Отзыв не найден при попытке архивирования: ${id}`)
                     return false;
                 }
 
@@ -302,5 +267,32 @@ export class RecallService {
             );
             return false;
         }
+    }
+
+    /**
+     * Получает список отзывов из АРХИВА с возможностью фильтрации, сортировки, пагинации.
+     * 
+     * @param options.filter - фильтр для поиска отзывов
+     * @param options.sort - сортировка результатов
+     * @param options.skip - сколько записей пропустить (offset)
+     * @param options.take - сколько записей взять (limit)
+     * @returns массив отзывов с включённым расписанием
+     */
+    async getArchiveRecalls(options?: {
+        filter?: RecallFilterInput;
+        sort?: FieldSortInput;
+        skip?: number;
+        take?: number;
+    }): Promise<RecallGetModel[]> {
+        const { filter, sort, skip, take } = options || {};
+        const recalls: RecallGetModel[] = await this.prismaService.archiveRecall.findMany({
+            where: filter,
+            orderBy: sort ? { [sort.field]: sort.order || 'asc' } : undefined,
+            skip,
+            take,
+        });
+
+        this.logger.info(`Получение списка АРХИВНЫХ отзывов ${options?.filter}`);
+        return recalls;
     }
 }

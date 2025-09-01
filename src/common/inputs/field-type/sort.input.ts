@@ -9,5 +9,4 @@ export class FieldSortInput {
     @Field(()=>String,{ nullable: true })
     @IsOptional()
     order: 'asc' | 'desc';
-
 }

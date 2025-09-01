@@ -14,9 +14,9 @@ export class ScheduleService {
         private readonly prismaService: PrismaService,
         @Inject('winston') private readonly logger: Logger,
         private readonly ldapService: LdapService,
-
     ) {}
 
+    // поулчение списка расписания
     async getSchedules(options?: {
         filter?: ScheduleFilterInput;
         sort?: FieldSortInput;
@@ -26,7 +26,7 @@ export class ScheduleService {
         const { filter, sort, skip, take } = options || {};
         const schedules: ScheduleModel[] = await this.prismaService.schedule.findMany({
             where: filter,
-            orderBy: sort,
+            orderBy: sort ? { [sort.field]: sort.order || 'asc' } : undefined,
             skip,
             take,
         })
@@ -61,7 +61,7 @@ export class ScheduleService {
                 }
             })
     
-            return findedSchedule
+            return findedSchedule;
         }
         catch(err) {
             this.logger.error(`Ошибка при поиске дубликата записи расписания: ${err.message}`);
@@ -89,7 +89,7 @@ export class ScheduleService {
 
             this.logger.info(`Запись расписания создана: ${newSchedule.fio}-${newSchedule.order} пользователем ${authUsername}`);
 
-            return true
+            return true;
         }
         catch(err) {
             this.logger.error(`Ошибка при работе с БД (создание записи расписания): ${err.message} пользователем ${authUsername}`);
@@ -99,7 +99,7 @@ export class ScheduleService {
 
     // удаление записи расписания
     async delete(id: string, authUsername: string):Promise<boolean> {
-        const findedSchedule = await this.findById(id)
+        await this.findById(id)
 
         try {
             const deletedSchedule = await this.prismaService.schedule.delete({
@@ -110,7 +110,7 @@ export class ScheduleService {
 
             this.logger.info(`Запись расписания удалена: ${deletedSchedule.fio}-${deletedSchedule.order} пользователем ${authUsername}`);
 
-            return true
+            return true;
         }
         catch(err) {
             this.logger.error(`Ошибка при работе с БД (удаление записи расписания): ${err.message}`);
@@ -120,7 +120,7 @@ export class ScheduleService {
 
     // изменение записи
     async update(id: string, input: ScheduleUpdateInput, authUsername: string):Promise<boolean> {
-        const findedSchedule = await this.findById(id)
+        await this.findById(id)
         const data = {
             ...input,
             updatedBy: authUsername
@@ -135,7 +135,7 @@ export class ScheduleService {
 
             this.logger.info(`Запись расписания изменена: ${updatedSchedule.fio}-${updatedSchedule.order} пользователем ${authUsername}`);
 
-            return true
+            return true;
         }
         catch(err) {
             this.logger.error(`Ошибка при работе с БД (изменение записи расписания): ${err.message}`);
@@ -229,5 +229,23 @@ export class ScheduleService {
             );
             return false;
         }
+    }
+
+    // поулчение списка АРХИВНОГО расписания
+    async getArchiveSchedules(options?: {
+        filter?: ScheduleFilterInput;
+        sort?: FieldSortInput;
+        skip?: number;
+        take?: number;
+    }):Promise<ScheduleModel[]> {
+        const { filter, sort, skip, take } = options || {};
+        const schedules: ScheduleModel[] = await this.prismaService.archiveSchedule.findMany({
+            where: filter,
+            orderBy: sort ? { [sort.field]: sort.order || 'asc' } : undefined,
+            skip,
+            take,
+        })
+
+        return schedules;
     }
 }

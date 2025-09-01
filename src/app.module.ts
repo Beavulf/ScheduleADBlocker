@@ -15,6 +15,8 @@ import { ScheduleModule } from './schedule/schedule.module';
 import { RecallModule } from './recall/recall.module';
 import { OnetimeModule } from './onetime/onetime.module';
 import { ScheduleModule as NestScheduleModule } from '@nestjs/schedule';
+import { PrismaGqlExceptionFilter } from './common/filters/prisma-gql-exception.filter';
+import { APP_FILTER } from '@nestjs/core';
 
 
 @Module({
@@ -41,6 +43,6 @@ import { ScheduleModule as NestScheduleModule } from '@nestjs/schedule';
     OnetimeModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, {provide: APP_FILTER, useClass: PrismaGqlExceptionFilter}],
 })
 export class AppModule {}

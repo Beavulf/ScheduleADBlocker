@@ -1,19 +1,21 @@
-import { Args, Context, ID, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, ID, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { OtdelService } from './otdel.service';
 import { CreateInput } from './inputs/create.input';
-import { UseGuards } from '@nestjs/common';
+import { UseFilters, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CreateModel } from './models/create.model';
 import { UpdateInput } from './inputs/update.input';
 import { GetAuthUserName } from 'src/common/decorators/get-auth-username';
+import { PrismaGqlExceptionFilter } from 'src/common/filters/prisma-gql-exception.filter';
 
 @UseGuards(JwtAuthGuard)
+@UseFilters(PrismaGqlExceptionFilter)
 @Resolver()
 export class OtdelResolver {
   constructor(private readonly otdelService: OtdelService) {}
 
   @Mutation(()=>Boolean, {
-    description:"Создать новый отдел"
+    description:"Добавить новый отдел"
   })
   async createOtdel(
     @Args('data') input: CreateInput, 

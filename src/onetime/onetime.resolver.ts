@@ -1,14 +1,16 @@
 import { Args, ID, Mutation, Resolver, Query } from '@nestjs/graphql';
 import { OnetimeService } from './onetime.service';
 import { OneTimeCreateInput } from './inputs/create.input';
-import { NotFoundException, UseGuards } from '@nestjs/common';
+import { NotFoundException, UseFilters, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { GetAuthUserName } from 'src/common/decorators/get-auth-username';
 import { OneTimeFilterInput } from './inputs/filter.input';
 import { FieldSortInput } from 'src/common/inputs/field-type/sort.input';
 import { OneTimeGetModel } from './models/get.model';
 import { OneTimeUpdateInput } from './inputs/update.input';
+import { PrismaGqlExceptionFilter } from 'src/common/filters/prisma-gql-exception.filter';
 
+@UseFilters(PrismaGqlExceptionFilter)
 @Resolver()
 export class OnetimeResolver {
   constructor(private readonly onetimeService: OnetimeService) {}
@@ -21,7 +23,7 @@ export class OnetimeResolver {
     @Args('data') input: OneTimeCreateInput,
     @GetAuthUserName() authUsername: string
   ) {
-    return await this.onetimeService.create(input, authUsername)
+    return await this.onetimeService.create(input, authUsername);
   }
 
   @Mutation(()=>Boolean, {
@@ -32,7 +34,7 @@ export class OnetimeResolver {
     @Args('id',{type: ()=> ID}) id: string,
     @GetAuthUserName() authUsername: string
   ) {
-    return await this.onetimeService.delete(id, authUsername)
+    return await this.onetimeService.delete(id, authUsername);
   }
 
   @Mutation(()=>Boolean, {
@@ -44,7 +46,7 @@ export class OnetimeResolver {
     @Args('data') input: OneTimeUpdateInput,
     @GetAuthUserName() authUsername: string
   ) {
-    return await this.onetimeService.update(id, input, authUsername)
+    return await this.onetimeService.update(id, input, authUsername);
   }
 
   @Query(()=>[OneTimeGetModel], {
@@ -53,11 +55,11 @@ export class OnetimeResolver {
   @UseGuards(JwtAuthGuard)
   async getOneTimes(
     @Args('filter', { nullable: true }) filter?: OneTimeFilterInput,
-    @Args('sort', { nullable: true }) sort?: FieldSortInput,
+    @Args('sort', { nullable: true, defaultValue: { field: 'createdAt', order: 'desc' } }) sort?: FieldSortInput,
     @Args('skip', { nullable: true }) skip?: number,
     @Args('take', { nullable: true }) take?: number,
   ) {
-    return await this.onetimeService.getOneTimes({ filter, sort, skip, take })
+    return await this.onetimeService.getOneTimes({ filter, sort, skip, take });
   }
 
   @Mutation(()=>Boolean, {
@@ -70,6 +72,19 @@ export class OnetimeResolver {
     if(!isArchive){
       throw new NotFoundException(`Ошибка при архивации задачи ${id}`)
     }
-    return isArchive
+    return isArchive;
+  }
+
+  @Query(()=>[OneTimeGetModel], {
+    description: 'Получение списка разовых задач из архива'
+  })
+  @UseGuards(JwtAuthGuard)
+  async getArchiveOneTimes(
+    @Args('filter', { nullable: true }) filter?: OneTimeFilterInput,
+    @Args('sort', { nullable: true, defaultValue: { field: 'createdAt', order: 'desc' } }) sort?: FieldSortInput,
+    @Args('skip', { nullable: true }) skip?: number,
+    @Args('take', { nullable: true }) take?: number,
+  ) {
+    return await this.onetimeService.getArchiveOneTimes({ filter, sort, skip, take });
   }
 }
