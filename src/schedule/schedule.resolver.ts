@@ -1,4 +1,4 @@
-import { Args, ID, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Context, ID, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { ScheduleService } from './schedule.service';
 import { ScheduleCreateInput } from './inputs/create.input';
 import { GetAuthUserName } from 'src/common/decorators/get-auth-username';
@@ -95,7 +95,7 @@ export class ScheduleResolver {
   @Query(() => CronTaskInfoModel, {
     description: 'Получение информации о задаче расписания'
   }) 
-  async getCronTaskInfo(@Args('taskName') taskName: string) {
+  async getCronTaskInfo(@Args('taskName') taskName: string,@Context() context) {
     return await this.cronService.getCronTaskInfo(taskName);
   }
 

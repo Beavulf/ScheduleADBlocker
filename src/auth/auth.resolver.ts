@@ -23,6 +23,7 @@ export class AuthResolver {
     if(!req.user.sAMAccountName) {
       throw new NotFoundException('Пользователь не найден в Запросе(req)')
     }
+   
     return await this.authService.auth(res, req.user.sAMAccountName)
   }
 

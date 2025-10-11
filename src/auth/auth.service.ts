@@ -18,7 +18,7 @@ export class AuthService {
      * @returns true, если операция успешна
      */
     async logout(res: Response): Promise<boolean> {
-        this.setCookies(res, '', new Date(0)); // Удаляем refreshToken cookie
+        this.setCookies(res, 'refreshToken', new Date(0)); // Удаляем refreshToken cookie
         return true;
     }
 

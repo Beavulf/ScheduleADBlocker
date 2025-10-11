@@ -91,7 +91,7 @@ type Mutation {
   """Создание разовой задачи"""
   craeteOneTime(data: OneTimeCreateInput!): Boolean!
 
-  """Создать новый отдел"""
+  """Добавить новый отдел"""
   createOtdel(data: CreateInput!): Boolean!
 
   """Создание отзыва"""
@@ -263,8 +263,18 @@ input OneTimeUpdateInput {
 }
 
 type Query {
-  """Получение списка разовых задач из архиве"""
+  """Получение списка разовых задач из архива"""
   getArchiveOneTimes(filter: OneTimeFilterInput, skip: Float, sort: FieldSortInput = {field: "createdAt", order: "desc"}, take: Float): [OneTimeGetModel!]!
+
+  """
+  Получение списка АРХИВНЫХ отзывов (фильтр, сортировка, пропустить, сколько взять)
+  """
+  getArchiveRecalls(filter: RecallFilterInput, skip: Float, sort: FieldSortInput = {field: "createdAt", order: "desc"}, take: Float): [RecallGetModel!]!
+
+  """
+  Получение списка АРХИВНЫХ записей расписания (фильтр, сортировка, пропустить, сколько взять)
+  """
+  getArchiveSchedules(filter: ScheduleFilterInput, skip: Float, sort: FieldSortInput = {field: "createdAt", order: "desc"}, take: Float): [ScheduleModel!]!
 
   """Получение информации о задаче расписания"""
   getCronTaskInfo(taskName: String!): CronTaskInfoModel!
@@ -280,12 +290,12 @@ type Query {
   """
   Получение списка отзывов (фильтр, сортировка, пропустить, сколько взять)
   """
-  getRecalls(filter: RecallFilterInput, skip: Float, sort: FieldSortInput, take: Float): [RecallGetModel!]!
+  getRecalls(filter: RecallFilterInput, skip: Float, sort: FieldSortInput = {field: "createdAt", order: "desc"}, take: Float): [RecallGetModel!]!
 
   """
   Получение списка записей расписания (фильтр, сортировка, пропустить, сколько взять)
   """
-  getSchedules(filter: ScheduleFilterInput, skip: Float, sort: FieldSortInput, take: Float): [ScheduleModel!]!
+  getSchedules(filter: ScheduleFilterInput, skip: Float, sort: FieldSortInput = {field: "createdAt", order: "desc"}, take: Float): [ScheduleModel!]!
 
   """Поиск пользователя в AD по ФИО (cn) или логину (samaccountname)"""
   searchUser(data: SearchCnInput!): [UserModel!]!
@@ -405,9 +415,9 @@ type ScheduleModel {
   endDate: DateTime!
   fio: String!
   id: String!
+  isRecall: Boolean
   login: String!
   order: String!
-  recall: Boolean
   startDate: DateTime!
   status: Boolean
   type: TypeTaskEnum!

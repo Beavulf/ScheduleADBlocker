@@ -25,7 +25,7 @@ export class ScheduleModel {
     order: string
 
     @Field(()=>Boolean,{nullable: true})
-    recall?: boolean
+    isRecall?: boolean
 
     @Field(()=>TypeTaskEnum)
     type: TypeTaskEnum

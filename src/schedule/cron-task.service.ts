@@ -68,7 +68,7 @@ export class ScheduleCronTaskService {
      * Название задачи: handleUserBlockingSchedule
      * Важно: не допускает одновременного выполнения (anti-overlap).
      */
-    @Cron(CronExpression.EVERY_30_MINUTES, {
+    @Cron(CronExpression.EVERY_10_HOURS, {
         name: 'handleUserBlockingSchedule',
         timeZone: 'Europe/Moscow', // временная зона выполнения cron-задачи
     })

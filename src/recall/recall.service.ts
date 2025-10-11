@@ -57,24 +57,30 @@ export class RecallService {
             throw new ConflictException('Отзыв на эту запись уже существует');
         }
 
-        // Создаём новый отзыв в базе данных
-        const createdRecall = await this.prismaService.recall.create({
-            data: {
-                ...input,
-                createdBy: authUsername,
-                updatedBy: authUsername,
-                schedule: {
-                    connect: {
-                        id: idSchedule
-                    }
-                }
-            },
-            include: {
-                schedule: true
-            }
-        });
+        // Создаём новый отзыв и обновляем флаг isRecall в расписании в рамках транзакции
+        const [createdRecall] = await this.prismaService.$transaction([
+            this.prismaService.recall.create({
+                data: {
+                    ...input,
+                    createdBy: authUsername,
+                    updatedBy: authUsername,
+                    schedule: {
+                        connect: {
+                            id: idSchedule,
+                        },
+                    },
+                },
+                include: {
+                    schedule: true,
+                },
+            }),
+            this.prismaService.schedule.update({
+                where: { id: idSchedule },
+                data: { isRecall: true },
+            }),
+        ]);
 
-        this.logger.info(`Запись расписания создана: ID ${idSchedule} - ${createdRecall.order} пользователем ${authUsername}`);
+        this.logger.info(`Запись отзыва создана: ID ${idSchedule} - ${createdRecall.order} пользователем ${authUsername}`);
         return true;
     }
 

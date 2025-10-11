@@ -14,7 +14,7 @@ export class ScheduleCreateInput {
     @IsString({
         message: 'Поле ФИО должно быть строкой'
     })
-    @MinLength(6, {
+    @MinLength(2, {
         message: 'Минимальная длина ФИО - 6 символов'
     })
     @MaxLength(250, {
