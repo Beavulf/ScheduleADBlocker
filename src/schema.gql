@@ -47,7 +47,7 @@ type CronTaskInfoModel {
 }
 
 input DateFilterInput {
-  eq: DateTime
+  equals: DateTime
   gt: DateTime
   gte: DateTime
   lt: DateTime

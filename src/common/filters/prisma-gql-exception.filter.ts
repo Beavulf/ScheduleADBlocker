@@ -34,7 +34,7 @@ export class PrismaGqlExceptionFilter implements GqlExceptionFilter {
     }
     if (exception instanceof Prisma.PrismaClientValidationError) {
       this.logger.error(`Ошибка при работе с БД (PrismaClientValidationError): ${exception.message}`, { exception });
-      return new BadRequestException('Невалидные данные запроса');
+      return new BadRequestException(`Невалидные данные запроса ${exception.message}`);
     }
     this.logger.error(`Ошибка при работе с БД (Unknown exception in PrismaGqlExceptionFilter): ${exception instanceof Error ? exception.message : exception}`, { exception });
     return exception;

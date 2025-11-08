@@ -106,19 +106,28 @@ export class RecallService {
      * @param id - идентификатор отзыва
      * @param authUsername - имя пользователя, выполняющего удаление
      */
-    async delete(id: string, authUsername: string):Promise<boolean> {
+    async delete(id: string, authUsername: string): Promise<boolean> {
         // Проверяем, существует ли отзыв с таким id
-        await this.findById(id);
+        const recall = await this.findById(id);
+        await this.prismaService.$transaction(async (prisma) => {
+            // Удаляем отзыв
+            const deletedRecall = await prisma.recall.delete({
+                where: { id },
+                include: { schedule: true }
+            });
+            // Обновляем связанное расписание, если есть scheduleId
+            if (deletedRecall.scheduleId) {
+                await prisma.schedule.update({
+                    where: { id: deletedRecall.scheduleId },
+                    data: { isRecall: false, status:false }
+                });
+            }
 
-        // Удаляем отзыв из базы данных
-        const deletedRecall = await this.prismaService.recall.delete({
-            where: { id },
-            include: { schedule: true }
+            this.logger.info(
+                `Запись об отзыве удалена: ${deletedRecall.schedule?.fio ?? ''} - ${deletedRecall.order} пользователем ${authUsername}`, 
+                { label: 'service' }
+            );
         });
-
-        this.logger.info(
-            `Запись об отзыве удалена: ${deletedRecall.schedule.fio} - ${deletedRecall.order} пользователем ${authUsername}`
-        );
         return true;
     }
     
@@ -236,7 +245,7 @@ export class RecallService {
                         startDate: recall.startDate,
                         endDate: recall.endDate,
                         description: recall.description,
-                        status: false, // Архивный отзыв всегда неактивен
+                        status: recall.status, // Архивный отзыв всегда неактивен
                         scheduleId: recall.scheduleId,
                         createdAt: recall.createdAt,
                         updatedAt: recall.updatedAt,

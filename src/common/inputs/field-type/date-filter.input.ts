@@ -15,5 +15,5 @@ export class DateFilterInput {
   lte?: Date; // меньше или равно
 
   @Field(() => Date, { nullable: true })
-  eq?: Date; // равно
+  equals?: Date; // равно
 }

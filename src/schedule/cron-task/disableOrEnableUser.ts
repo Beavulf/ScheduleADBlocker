@@ -14,7 +14,7 @@ export default async function enableOrDisableUser(
     let foundUsers: UserModel[];
     const login = isRecall===false ? task.login : task.schedule.login;
 
-    logger.info(`Изменение статуса пользователя ${isRecall ? '(Отзыв) ' : ''}(${status === '512' ? 'ВКЛ.' : 'ВЫКЛ.'}): ${login} по приказу ${task.order ?? '-разовая'}`, { label: 'cron' });
+    logger.info(`Изменение статуса пользователя ${isRecall ? '(Отзыв) ' : ''}(${status === '512' ? 'ВКЛ.' : 'ВЫКЛ.'}): ${login} по приказу ${task.order ?? '-разовая'} ${new Date().toLocaleString()}`, { label: 'cron' });
 
     try {
         // ищем в АД чтобы получить актуальную информацию
@@ -25,21 +25,21 @@ export default async function enableOrDisableUser(
             { label: 'cron' }
         );
         // записываем в файл людей, которые не обработались
-        await NotFoundUserToFile(task.fio, login, `ошибка при поиске в AD ${isRecall ? '(Отзыв)' : ''}`);
+        await NotFoundUserToFile(isRecall ? task.schedule.fio : task.fio, login, `ошибка при поиске в AD ${isRecall ? '(Отзыв)' : ''} ${new Date().toLocaleString()}`);
         return false;
     }
 
     if (!foundUsers.length) {
         logger.error(`Пользователь не найден в AD ${isRecall ? '(Отзыв)' : ''}: ${login}`, { label: 'cron' });
         // записываем в файл людей, которые не обработались
-        await NotFoundUserToFile(task.fio, login, `не найден в AD ${isRecall ? '(Отзыв)' : ''}`);
+        await NotFoundUserToFile(isRecall ? task.schedule.fio : task.fio, login, `не найден в AD ${isRecall ? '(Отзыв)' : ''} ${new Date().toLocaleString()}`);
         return false;
     }
 
     if (foundUsers.length>1) {
         logger.error(`Найдено несколько пользователей с логином ${isRecall ? '(Отзыв)' : ''}: ${login}`, { label: 'cron' });
         // записываем в файл людей, которые не обработались
-        await NotFoundUserToFile(task.fio, login, `найдено больше 1-го пользователя ${isRecall ? '(Отзыв)' : ''}`);
+        await NotFoundUserToFile(isRecall ? task.schedule.fio : task.fio, login, `найдено больше 1-го пользователя ${isRecall ? '(Отзыв)' : ''} ${new Date().toLocaleString()}`);
         return false;
     }
 
@@ -49,18 +49,18 @@ export default async function enableOrDisableUser(
     if (!distinguishedName) {
         logger.error(`Отсутствует distinguishedName для пользователя ${isRecall ? '(Отзыв)' : ''}: ${login} - пользователь не будет изменён.`, { label: 'cron' });
         // записываем в файл людей, которые не обработались
-        await NotFoundUserToFile(task.fio, login, `отсутствует distinguishedName ${isRecall ? '(Отзыв)' : ''}`);
+        await NotFoundUserToFile(isRecall ? task.schedule.fio : task.fio, login, `отсутствует distinguishedName ${isRecall ? '(Отзыв)' : ''} ${new Date().toLocaleString()}`);
         return false;
     }
 
     try {
         // меняем статус пользователя по найденному DN
         await ldapService.enableOrDisableUser(status, { userDn: distinguishedName });
-        logger.info(`Пользователь успешно ${status === '512' ? 'ВКЛЮЧЕН' : 'ВЫКЛЮЧЕН'} ${isRecall ? '(Отзыв)' : ''}: ${login} - ${distinguishedName}`, { label: 'cron' });
+        logger.info(`Пользователь успешно ${status === '512' ? 'ВКЛЮЧЕН' : 'ВЫКЛЮЧЕН'} ${isRecall ? '(Отзыв)' : ''}: ${login} - ${distinguishedName} ${new Date().toLocaleString()}`, { label: 'cron' });
         return true;
     } catch (err) {
         // записываем в файл людей, которые не обработались
-        await NotFoundUserToFile(task.fio, login, `ошибка изменения статуса в АД ${isRecall ? '(Отзыв)' : ''}`);
+        await NotFoundUserToFile(isRecall ? task.schedule.fio : task.fio, login, `ошибка изменения статуса в АД ${isRecall ? '(Отзыв)' : ''} ${new Date().toLocaleString()}`);
         logger.error(
             `Ошибка при изменении статуса пользователя в АД ${isRecall ? '(Отзыв)' : ''}: — ${err.message}`,
             { label: 'cron' }

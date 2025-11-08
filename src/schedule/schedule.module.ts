@@ -8,6 +8,7 @@ import { LdapModule } from 'src/ldap/ldap.module';
 import { ScheduleCronTaskService } from './cron-task.service';
 import { OnetimeService } from 'src/onetime/onetime.service';
 import { RecallService } from 'src/recall/recall.service';
+import { LogsModule } from './logs/logs.module';
 
 registerEnumType(TypeTaskEnum, {
   name: 'TypeTaskEnum',
@@ -21,7 +22,8 @@ registerEnumType(TypeTaskEnum, {
     ScheduleService, 
     ScheduleCronTaskService, 
     OnetimeService,
-    RecallService
+    RecallService,
+    LogsModule
   ],
 })
 export class ScheduleModule {}
