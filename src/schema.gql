@@ -339,6 +339,7 @@ type RecallGetModel {
   endDate: DateTime!
   id: String!
   order: String!
+  schedule: ScheduleModel
   scheduleId: String!
   startDate: DateTime!
   status: Boolean!
@@ -397,7 +398,7 @@ input ScheduleFilterInput {
   createdBy: StringFilterInput
   endDate: DateFilterInput
   fio: StringFilterInput
-  id: String
+  id: StringFilterInput
   isRecall: Boolean
   login: StringFilterInput
   order: StringFilterInput
@@ -443,7 +444,8 @@ input SearchCnInput {
 input StringFilterInput {
   contains: String
   endsWith: String
-  eq: String
+  equals: String
+  in: [String!]
   startsWith: String
 }
 

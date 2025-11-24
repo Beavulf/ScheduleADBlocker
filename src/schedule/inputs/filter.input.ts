@@ -8,9 +8,9 @@ import { StringFilterInput } from "src/common/inputs/field-type/string-filter.in
 @InputType()
 export class ScheduleFilterInput {
 
-    @Field(()=>String, {nullable: true})
+    @Field(()=>StringFilterInput, {nullable: true})
     @IsOptional()
-    id?: string
+    id?: StringFilterInput
 
     @Field(()=>StringFilterInput, {nullable: true})
     @IsOptional()

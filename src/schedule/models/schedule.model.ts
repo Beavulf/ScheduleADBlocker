@@ -44,4 +44,5 @@ export class ScheduleModel {
 
     @Field(()=>String)
     updatedBy: string
+    
 }
