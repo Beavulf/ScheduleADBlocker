@@ -54,7 +54,8 @@ export class LdapService {
     getOptsByCn(value: string): ldap.SearchOptions {
         const opts: ldap.SearchOptions = {
             // Фильтр ищет пользователей, у которых cn или sAMAccountName содержит value
-            filter: `(|(cn=*${value}*)(sAMAccountName=*${value}*))`,
+            // filter: `(|(cn=*${value}*)(sAMAccountName=*${value}*))`,
+            filter: `(&(objectClass=user)(|(cn=*${value}*)(sAMAccountName=*${value}*)))`,
             scope: 'sub', // Поиск по всем вложенным объектам в базе DN
             attributes // Список атрибутов, которые будут возвращены
         }
