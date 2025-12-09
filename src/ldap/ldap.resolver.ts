@@ -11,25 +11,26 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 export class LdapResolver {
   constructor(private readonly ldapService: LdapService) {}
 
-  @Query(() => [UserModel],{
-    description: 'Поиск пользователя в AD по ФИО (cn) или логину (samaccountname)'
+  @Query(() => [UserModel], {
+    description:
+      'Поиск пользователя в AD по ФИО (cn) или логину (samaccountname)',
   })
-  async searchUser(@Args('data') input:SearchCnInput) {
-    const {cnOrSamaccountname} = input
+  async searchUser(@Args('data') input: SearchCnInput) {
+    const { cnOrSamaccountname } = input;
     return await this.ldapService.searchLdapUser(cnOrSamaccountname);
   }
 
   @Mutation(() => Boolean, {
-    description: 'Включение пользователя в AD'
+    description: 'Включение пользователя в AD',
   })
-  async enableUser(@Args('data') userDn: ModifyInput){
-    return await this.ldapService.enableOrDisableUser('512', userDn)
+  async enableUser(@Args('data') userDn: ModifyInput) {
+    return await this.ldapService.enableOrDisableUserLdapts('512', userDn);
   }
 
   @Mutation(() => Boolean, {
-    description: 'Отключение пользователя в AD'
+    description: 'Отключение пользователя в AD',
   })
-  async disableUser(@Args('data') userDn: ModifyInput){
-    return await this.ldapService.enableOrDisableUser('514', userDn)
+  async disableUser(@Args('data') userDn: ModifyInput) {
+    return await this.ldapService.enableOrDisableUserLdapts('514', userDn);
   }
 }

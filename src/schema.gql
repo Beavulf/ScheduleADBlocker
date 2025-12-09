@@ -478,7 +478,7 @@ type UserModel {
   description: String
   distinguishedName: String
   logonHours: String
-  memberOf: String
+  memberOf: [String!]
   sAMAccountName: String
   title: String
   userAccountControl: String

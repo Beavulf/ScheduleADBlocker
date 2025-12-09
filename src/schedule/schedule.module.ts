@@ -18,12 +18,12 @@ registerEnumType(TypeTaskEnum, {
 @Module({
   imports: [NestScheduleModule.forRoot(), LdapModule],
   providers: [
-    ScheduleResolver, 
-    ScheduleService, 
-    ScheduleCronTaskService, 
+    ScheduleResolver,
+    ScheduleService,
+    ScheduleCronTaskService,
     OnetimeService,
     RecallService,
-    LogsModule
+    LogsModule,
   ],
 })
 export class ScheduleModule {}

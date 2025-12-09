@@ -11,34 +11,36 @@ import { Response, Request } from 'express';
 export class AuthResolver {
   constructor(private readonly authService: AuthService) {}
 
-  @Mutation(()=>AuthModel, {
-    description: "Аавторизация пользователя по его Логину и Паролю из АД, возврат токена доступа."
+  @Mutation(() => AuthModel, {
+    description:
+      'Аавторизация пользователя по его Логину и Паролю из АД, возврат токена доступа.',
   })
   @UseGuards(GqlAuthGuard)
   async auth(
-    @Args('data') input: LoginInput, 
+    @Args('data') input: LoginInput,
     @Context('res') res: Response,
-    @Context('req') req
-  ) {    
-    if(!req.user.sAMAccountName) {
-      throw new NotFoundException('Пользователь не найден в Запросе(req)')
+    @Context('req') req,
+  ) {
+    if (!req.user.sAMAccountName) {
+      throw new NotFoundException('Пользователь не найден в Запросе(req)');
     }
-   
-    return await this.authService.auth(res, req.user.sAMAccountName)
+
+    return await this.authService.auth(res, req.user.sAMAccountName);
   }
 
-  @Mutation(()=>Boolean, {
-    description: "Деавторизация (выход) пользователя из программы."
+  @Mutation(() => Boolean, {
+    description: 'Деавторизация (выход) пользователя из программы.',
   })
   async logout(@Context('res') res: Response) {
-    return await this.authService.logout(res)
+    return await this.authService.logout(res);
   }
 
-  @Mutation(()=>AuthModel, {
-    description: "Обновление токена доступа пользователя через Рефреш токен в куках."
+  @Mutation(() => AuthModel, {
+    description:
+      'Обновление токена доступа пользователя через Рефреш токен в куках.',
   })
   @UseGuards(JwtAuthGuard)
   async refreshToken(@Context() context) {
-    return await this.authService.refreshToken(context.res, context.req)
+    return await this.authService.refreshToken(context.res, context.req);
   }
 }

@@ -16,9 +16,8 @@ import { JwtStrategy } from './strategys/jwt.strategy';
       inject: [ConfigService],
     }),
     LdapModule,
-    PassportModule
-],
+    PassportModule,
+  ],
   providers: [AuthResolver, AuthService, JwtStrategy],
 })
-
 export class AuthModule {}

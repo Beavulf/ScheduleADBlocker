@@ -1,9 +1,8 @@
-import { Field, ObjectType } from "@nestjs/graphql";
+import { Field, ObjectType } from '@nestjs/graphql';
 
 @ObjectType()
 export class CronTaskInfoModel {
-
-  @Field(()=> Boolean)
+  @Field(() => Boolean)
   isActive: boolean;
 
   @Field(() => String)

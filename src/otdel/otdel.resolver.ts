@@ -14,41 +14,41 @@ import { PrismaGqlExceptionFilter } from 'src/common/filters/prisma-gql-exceptio
 export class OtdelResolver {
   constructor(private readonly otdelService: OtdelService) {}
 
-  @Mutation(()=>Boolean, {
-    description:"Добавить новый отдел"
+  @Mutation(() => Boolean, {
+    description: 'Добавить новый отдел',
   })
   async createOtdel(
-    @Args('data') input: CreateInput, 
-    @GetAuthUserName() authUsername: string
-  ) {
-    return await this.otdelService.create(input, authUsername)
-  }
-
-  @Mutation(()=> Boolean, {
-    description:"Изменить отдел"
-  })
-  async updateOtdel(
-    @Args('id', {type: ()=> ID}) id: string,
-    @Args('data') input: UpdateInput, 
-    @GetAuthUserName() authUsername: string
-  ) {
-    return await this.otdelService.update(id, input, authUsername)
-  }
-
-  @Mutation(()=> Boolean,{
-    description: "Удалить отдел из БД"
-  })
-  async deleteOtdel(
-    @Args('id', {type: ()=> ID}) id: string, 
+    @Args('data') input: CreateInput,
     @GetAuthUserName() authUsername: string,
   ) {
-    return await this.otdelService.delete(id, authUsername)
+    return await this.otdelService.create(input, authUsername);
   }
 
-  @Query(()=>[CreateModel], {
-    description: 'Получение списка отделов/ПТО'
+  @Mutation(() => Boolean, {
+    description: 'Изменить отдел',
+  })
+  async updateOtdel(
+    @Args('id', { type: () => ID }) id: string,
+    @Args('data') input: UpdateInput,
+    @GetAuthUserName() authUsername: string,
+  ) {
+    return await this.otdelService.update(id, input, authUsername);
+  }
+
+  @Mutation(() => Boolean, {
+    description: 'Удалить отдел из БД',
+  })
+  async deleteOtdel(
+    @Args('id', { type: () => ID }) id: string,
+    @GetAuthUserName() authUsername: string,
+  ) {
+    return await this.otdelService.delete(id, authUsername);
+  }
+
+  @Query(() => [CreateModel], {
+    description: 'Получение списка отделов/ПТО',
   })
   async getOtdels() {
-    return await this.otdelService.getOtdels()
+    return await this.otdelService.getOtdels();
   }
 }

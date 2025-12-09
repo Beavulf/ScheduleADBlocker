@@ -15,76 +15,88 @@ import { PrismaGqlExceptionFilter } from 'src/common/filters/prisma-gql-exceptio
 export class OnetimeResolver {
   constructor(private readonly onetimeService: OnetimeService) {}
 
-  @Mutation(()=>Boolean, {
-    description: 'Создание разовой задачи'
+  @Mutation(() => Boolean, {
+    description: 'Создание разовой задачи',
   })
   @UseGuards(JwtAuthGuard)
   async craeteOneTime(
     @Args('data') input: OneTimeCreateInput,
-    @GetAuthUserName() authUsername: string
+    @GetAuthUserName() authUsername: string,
   ) {
     return await this.onetimeService.create(input, authUsername);
   }
 
-  @Mutation(()=>Boolean, {
-    description: 'Удаление разовой задачи'
+  @Mutation(() => Boolean, {
+    description: 'Удаление разовой задачи',
   })
   @UseGuards(JwtAuthGuard)
   async deleteOneTime(
-    @Args('id',{type: ()=> ID}) id: string,
-    @GetAuthUserName() authUsername: string
+    @Args('id', { type: () => ID }) id: string,
+    @GetAuthUserName() authUsername: string,
   ) {
     return await this.onetimeService.delete(id, authUsername);
   }
 
-  @Mutation(()=>Boolean, {
+  @Mutation(() => Boolean, {
     description: 'Изменение разовой задачи',
   })
   @UseGuards(JwtAuthGuard)
   async updateOneTime(
-    @Args('id',{type: ()=> ID}) id: string,
+    @Args('id', { type: () => ID }) id: string,
     @Args('data') input: OneTimeUpdateInput,
-    @GetAuthUserName() authUsername: string
+    @GetAuthUserName() authUsername: string,
   ) {
     return await this.onetimeService.update(id, input, authUsername);
   }
 
-  @Query(()=>[OneTimeGetModel], {
-    description: 'Получение списка отзывов (фильтр, сортировка, пропустить, сколько взять)'
+  @Query(() => [OneTimeGetModel], {
+    description:
+      'Получение списка отзывов (фильтр, сортировка, пропустить, сколько взять)',
   })
   @UseGuards(JwtAuthGuard)
   async getOneTimes(
     @Args('filter', { nullable: true }) filter?: OneTimeFilterInput,
-    @Args('sort', { nullable: true, defaultValue: { field: 'createdAt', order: 'desc' } }) sort?: FieldSortInput,
+    @Args('sort', {
+      nullable: true,
+      defaultValue: { field: 'createdAt', order: 'desc' },
+    })
+    sort?: FieldSortInput,
     @Args('skip', { nullable: true }) skip?: number,
     @Args('take', { nullable: true }) take?: number,
   ) {
     return await this.onetimeService.getOneTimes({ filter, sort, skip, take });
   }
 
-  @Mutation(()=>Boolean, {
-    description: 'Архивация разовой задачи'
+  @Mutation(() => Boolean, {
+    description: 'Архивация разовой задачи',
   })
-  async archiveOneTime(
-    @Args('id',{type: ()=> ID}) id: string,
-  ) {
-    const isArchive = await this.onetimeService.toArchive(id)
-    if(!isArchive){
-      throw new NotFoundException(`Ошибка при архивации задачи ${id}`)
+  async archiveOneTime(@Args('id', { type: () => ID }) id: string) {
+    const isArchive = await this.onetimeService.toArchive(id);
+    if (!isArchive) {
+      throw new NotFoundException(`Ошибка при архивации задачи ${id}`);
     }
     return isArchive;
   }
 
-  @Query(()=>[OneTimeGetModel], {
-    description: 'Получение списка разовых задач из архива'
+  @Query(() => [OneTimeGetModel], {
+    description: 'Получение списка разовых задач из архива',
   })
   @UseGuards(JwtAuthGuard)
   async getArchiveOneTimes(
     @Args('filter', { nullable: true }) filter?: OneTimeFilterInput,
-    @Args('sort', { nullable: true, defaultValue: { field: 'createdAt', order: 'desc' } }) sort?: FieldSortInput,
+    @Args('sort', {
+      nullable: true,
+      defaultValue: { field: 'createdAt', order: 'desc' },
+    })
+    sort?: FieldSortInput,
     @Args('skip', { nullable: true }) skip?: number,
     @Args('take', { nullable: true }) take?: number,
   ) {
-    return await this.onetimeService.getArchiveOneTimes({ filter, sort, skip, take });
+    return await this.onetimeService.getArchiveOneTimes({
+      filter,
+      sort,
+      skip,
+      take,
+    });
   }
 }

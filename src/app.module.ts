@@ -19,7 +19,6 @@ import { PrismaGqlExceptionFilter } from './common/filters/prisma-gql-exception.
 import { LogsModule } from './schedule/logs/logs.module';
 import { APP_FILTER } from '@nestjs/core';
 
-
 @Module({
   imports: [
     PrismaModule,
@@ -33,7 +32,7 @@ import { APP_FILTER } from '@nestjs/core';
     WinstonModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: asyncWinstonConfig,
-      inject: [ConfigService]
+      inject: [ConfigService],
     }),
     NestScheduleModule.forRoot(),
     AuthModule,
@@ -42,9 +41,12 @@ import { APP_FILTER } from '@nestjs/core';
     ScheduleModule,
     RecallModule,
     OnetimeModule,
-    LogsModule
+    LogsModule,
   ],
   controllers: [AppController],
-  providers: [AppService, {provide: APP_FILTER, useClass: PrismaGqlExceptionFilter}],
+  providers: [
+    AppService,
+    { provide: APP_FILTER, useClass: PrismaGqlExceptionFilter },
+  ],
 })
 export class AppModule {}
