@@ -18,12 +18,6 @@ const attributes = [
   'userAccountControl', //включена или отключена
   'logonHours', //часы входа
 ];
-// опции для поиска всех пользователей
-// const optsAllUsers: ldap.SearchOptions = {
-//     filter: '(objectClass=user)',
-//     scope: 'sub',
-//     attributes
-// }
 
 @Injectable()
 export class LdapService {
@@ -207,68 +201,9 @@ export class LdapService {
   // поиск пользователя и получение найденного списка
   async searchLdapUser(cnOrSamaccountname: string): Promise<UserModel[]> {
     const client = await this.createAndBindLdapClient();
-
-    this.logger.info(`Попытка поиска пользователя - ${cnOrSamaccountname}`);
-
     const users: UserModel[] = await this.getUsers(client, cnOrSamaccountname);
-
     return users;
   }
-
-  // получение опции для модифицирования пользователя (отключение-514/включение-512)
-  // private getChangeUserAccountControl(state: string): ldap.Change {
-  //     const change = new ldap.Change({
-  //         operation: 'replace',
-  //         modification: new ldap.Attribute({
-  //             type: 'userAccountControl',
-  //             values: [state]
-  //         })
-  //     })
-
-  //     return change;
-  // }
-
-  // изменения записи пользователя по distinguishedName (CN=Tsyhanokm, DN=Users, DN=corp, DN=local)
-  /**
-   * Модифицирует атрибут userAccountControl для пользователя в LDAP.
-   * Используется для включения (512) или отключения (514) пользователя.
-   * @param client - экземпляр LDAP клиента с активным соединением
-   * @param state - новое значение userAccountControl (например, '512' или '514')
-   * @param userDn - объект с DN пользователя (ModifyInput)
-   * @returns Promise<void> - успешно завершится при удачной модификации, либо выбросит исключение при ошибке
-   */
-  // private async modifyUser(client: ldap.Client, state: string, userDn: ModifyInput): Promise<void> {
-  //     const normalDN = userDn.userDn?.normalize('NFC');
-  //     return new Promise((resolve, reject) => {
-  //         this.logger.info(`Попытка изменения статуса пользователя - ${userDn.userDn}.`);
-  //         client.modify(
-  //             userDn.userDn,
-  //             this.getChangeUserAccountControl(state),
-  //             (err) => {
-  //                 if (err) {
-  //                     // Логируем и пробрасываем ошибку, если изменение не удалось
-  //                     this.logger.error(`Ошибка при изменении пользователя - ${err.message}.`);
-  //                     reject(new ConflictException(`Ошибка при изменении пользователя - ${err.message}.`));
-  //                 } else {
-  //                     // Логируем успешное изменение статуса пользователя
-  //                     this.logger.info(`Пользователь ${userDn.userDn} успешно изменен на статус ${state}.`);
-  //                     resolve();
-  //                 }
-  //             }
-  //         );
-  //     });
-  // }
-
-  // включение или отключение пользователя 514 off 512 on
-  // async enableOrDisableUser(state: string, userDn: ModifyInput): Promise<boolean> {
-  //     const client = await this.createAndBindLdapClient();
-  //     try {
-  //         await this.modifyUser(client, state, userDn);
-  //         return true;
-  //     } finally {
-  //         client.unbind();
-  //     }
-  // }
 
   // ******************************РАБОТА С ЧАСАМИ ДОСТУПА**********************************
   // private parseLogonHours(logonHoursBuffer: Buffer): {

@@ -31,7 +31,7 @@ export default async function enableOrDisableUser(
     await NotFoundUserToFile(
       isRecall ? task.schedule.fio : task.fio,
       login,
-      `ошибка при поиске в AD ${isRecall ? '(Отзыв)' : ''} ${new Date().toLocaleString()}`,
+      `Ошибка при поиске в AD ${isRecall ? '(Отзыв)' : ''} ${new Date().toLocaleString()}`,
     );
     return false;
   }
@@ -45,7 +45,7 @@ export default async function enableOrDisableUser(
     await NotFoundUserToFile(
       isRecall ? task.schedule.fio : task.fio,
       login,
-      `не найден в AD ${isRecall ? '(Отзыв)' : ''} ${new Date().toLocaleString()}`,
+      `Не найден в AD ${isRecall ? '(Отзыв)' : ''} ${new Date().toLocaleString()}`,
     );
     return false;
   }
@@ -59,7 +59,7 @@ export default async function enableOrDisableUser(
     await NotFoundUserToFile(
       isRecall ? task.schedule.fio : task.fio,
       login,
-      `найдено больше 1-го пользователя ${isRecall ? '(Отзыв)' : ''} ${new Date().toLocaleString()}`,
+      `Найдено больше 1-го пользователя ${isRecall ? '(Отзыв)' : ''} ${new Date().toLocaleString()}`,
     );
     return false;
   }
@@ -76,7 +76,7 @@ export default async function enableOrDisableUser(
     await NotFoundUserToFile(
       isRecall ? task.schedule.fio : task.fio,
       login,
-      `отсутствует distinguishedName ${isRecall ? '(Отзыв)' : ''} ${new Date().toLocaleString()}`,
+      `Отсутствует distinguishedName ${isRecall ? '(Отзыв)' : ''} ${new Date().toLocaleString()}`,
     );
     return false;
   }
@@ -96,7 +96,7 @@ export default async function enableOrDisableUser(
     await NotFoundUserToFile(
       isRecall ? task.schedule.fio : task.fio,
       login,
-      `ошибка изменения статуса в АД ${isRecall ? '(Отзыв)' : ''} ${new Date().toLocaleString()}`,
+      `Ошибка изменения статуса в АД ${isRecall ? '(Отзыв)' : ''} ${new Date().toLocaleString()}`,
     );
     logger.error(
       `Ошибка при изменении статуса пользователя в АД ${isRecall ? '(Отзыв)' : ''}: — ${err.message}`,

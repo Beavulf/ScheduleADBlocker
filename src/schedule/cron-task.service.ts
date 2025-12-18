@@ -29,7 +29,7 @@ export class ScheduleCronTaskService {
     private readonly recallService: RecallService,
     private readonly onetimeService: OnetimeService,
     private readonly schedulerRegistry: SchedulerRegistry,
-  ) {}
+  ) { }
   // флаг для предотвращения одновременного исполнения оркестратора (анти-оверлап в одном инстансе)
   private isRunning = false;
   // счетчик пропущенных тиков, если предыдущий запуск ещё идёт
