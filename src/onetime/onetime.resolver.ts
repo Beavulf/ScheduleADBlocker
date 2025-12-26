@@ -66,7 +66,7 @@ export class OnetimeResolver {
   ) {
     return await this.onetimeService.getOneTimes({ filter, sort, skip, take });
   }
-
+  @UseGuards(JwtAuthGuard)
   @Mutation(() => Boolean, {
     description: 'Архивация разовой задачи',
   })

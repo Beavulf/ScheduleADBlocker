@@ -3,6 +3,7 @@ import { TypeTaskEnum } from '@prisma/client';
 import { IsOptional } from 'class-validator';
 import { DateFilterInput } from '../../common/inputs/field-type/date-filter.input';
 import { StringFilterInput } from 'src/common/inputs/field-type/string-filter.input';
+import { EnumFilterInput } from 'src/common/inputs/field-type/enum-filter.input';
 
 // импут для получение списка задач по условию
 @InputType()
