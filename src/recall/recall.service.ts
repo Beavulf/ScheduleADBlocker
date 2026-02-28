@@ -269,7 +269,7 @@ export class RecallService {
             startDate: recall.startDate,
             endDate: recall.endDate,
             description: recall.description,
-            status: recall.status, // Архивный отзыв всегда неактивен
+            status: recall.status,
             scheduleId: recall.scheduleId,
             createdAt: recall.createdAt,
             updatedAt: recall.updatedAt,

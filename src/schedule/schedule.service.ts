@@ -237,7 +237,6 @@ export class ScheduleService {
             { label: 'cron' },
           );
         }
-
         // Архивируем саму задачу
         await tx.archiveSchedule.create({
           data: {
