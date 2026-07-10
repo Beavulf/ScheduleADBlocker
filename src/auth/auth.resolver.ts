@@ -6,6 +6,7 @@ import { GqlAuthGuard } from './guards/gql-auth.guard';
 import { AuthModel } from './models/auth.models';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { Response, Request } from 'express';
+import { LdapUser } from './interfaces/ldapuser.interface';
 
 @Resolver()
 export class AuthResolver {
@@ -13,14 +14,14 @@ export class AuthResolver {
 
   @Mutation(() => AuthModel, {
     description:
-      'Аавторизация пользователя по его Логину и Паролю из АД, возврат токена доступа.',
+      'Авторизация пользователя по его Логину и Паролю из АД, возврат токена доступа.',
   })
   @UseGuards(GqlAuthGuard)
   async auth(
     @Args('data') input: LoginInput,
     @Context('res') res: Response,
-    @Context('req') req,
-  ) {
+    @Context('req') req: { user: LdapUser },
+  ) {    
     if (!req.user.sAMAccountName) {
       throw new NotFoundException('Пользователь не найден в Запросе(req)');
     }
@@ -40,7 +41,7 @@ export class AuthResolver {
       'Обновление токена доступа пользователя через Рефреш токен в куках.',
   })
   @UseGuards(JwtAuthGuard)
-  async refreshToken(@Context() context) {
+  async refreshToken(@Context() context: { req: Request; res: Response }) {
     return await this.authService.refreshToken(context.res, context.req);
   }
 }

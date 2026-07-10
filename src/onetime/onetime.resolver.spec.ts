@@ -71,14 +71,24 @@ describe('OnetimeResolver', () => {
 
       const result = await resolver.getOneTimes(filter, sort, skip, take);
 
-      expect(service.getOneTimes).toHaveBeenCalledWith({ filter, sort, skip, take });
+      expect(service.getOneTimes).toHaveBeenCalledWith({
+        filter,
+        sort,
+        skip,
+        take,
+      });
       expect(result).toBe(list);
     });
 
     it('should work when optional args are undefined and forward them as is', async () => {
       service.getOneTimes.mockResolvedValue([]);
 
-      const result = await resolver.getOneTimes(undefined, undefined, undefined, undefined);
+      const result = await resolver.getOneTimes(
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+      );
 
       expect(service.getOneTimes).toHaveBeenCalledWith({
         filter: undefined,
@@ -105,7 +115,9 @@ describe('OnetimeResolver', () => {
       const id = 'uuid-4';
       service.toArchive.mockResolvedValue(false);
 
-      await expect(resolver.archiveOneTime(id)).rejects.toBeInstanceOf(NotFoundException);
+      await expect(resolver.archiveOneTime(id)).rejects.toBeInstanceOf(
+        NotFoundException,
+      );
       expect(service.toArchive).toHaveBeenCalledWith(id);
     });
   });
@@ -119,9 +131,19 @@ describe('OnetimeResolver', () => {
       const list = [{ id: 'a' }] as any[];
       service.getArchiveOneTimes.mockResolvedValue(list);
 
-      const result = await resolver.getArchiveOneTimes(filter, sort, skip, take);
+      const result = await resolver.getArchiveOneTimes(
+        filter,
+        sort,
+        skip,
+        take,
+      );
 
-      expect(service.getArchiveOneTimes).toHaveBeenCalledWith({ filter, sort, skip, take });
+      expect(service.getArchiveOneTimes).toHaveBeenCalledWith({
+        filter,
+        sort,
+        skip,
+        take,
+      });
       expect(result).toBe(list);
     });
   });

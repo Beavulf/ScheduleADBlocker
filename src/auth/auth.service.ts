@@ -80,7 +80,7 @@ export class AuthService {
    * @param username - имя пользователя, для которого создаются токены
    * @returns объект с accessToken и refreshToken
    */
-  private async generateToken(username: string) {
+  private generateToken(username: string) {
     // Генерируем accessToken с коротким сроком действия
     const accessToken = this.jwtService.sign(
       { username },

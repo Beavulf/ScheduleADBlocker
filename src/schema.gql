@@ -84,7 +84,7 @@ type Mutation {
   archiveSchedule(id: ID!, shouldArchiveRecall: Boolean!): Boolean!
 
   """
-  Аавторизация пользователя по его Логину и Паролю из АД, возврат токена доступа.
+  Авторизация пользователя по его Логину и Паролю из АД, возврат токена доступа.
   """
   auth(data: LoginInput!): AuthModel!
 
